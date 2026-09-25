@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/classical-03fbe52d-ab9c-4880-bddc-1180e67e8896/styles.css">
+<script src="_ds/classical-03fbe52d-ab9c-4880-bddc-1180e67e8896/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Manrope:wght@400;600;800&family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Karla:wght@400;600&display=swap">
+<style>body{margin:0;background:#e9e7e4;}a{color:#8a5f22;}a:hover{color:#5e3f14;}</style>
+</helmet>
+<section style="padding:64px;display:flex;flex-direction:column;gap:40px;font-family:var(--font-body);color:var(--color-text);">
+<div style="display:flex;flex-direction:column;gap:8px;max-width:760px;">
+<div style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent-700);">Turn 1 · Japan Eateries home screen</div>
+<h1 style="margin:0;font-family:var(--font-heading);font-weight:400;font-size:48px;line-height:1.05;">Color and type pairings</h1>
+<p style="margin:0;font-size:16px;line-height:1.55;text-wrap:pretty;">Four directions applied to the same home screen. <a href="#1a">1a</a> uses the attached Classical system; <a href="#1b">1b</a> stays close to the reference; <a href="#1c">1c</a> and <a href="#1d">1d</a> move further out.</p>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:48px;align-items:flex-start;">
+
+<!-- 1a Classical -->
+<div id="1a" style="display:flex;flex-direction:column;gap:20px;width:360px;">
+<div style="display:flex;align-items:center;gap:12px;"><span style="font-family:ui-monospace,monospace;font-size:13px;padding:3px 9px;border:1px solid #201f1d;border-radius:20px;">1a</span><span style="font-size:15px;font-weight:600;">Classical — Cormorant / Lora</span></div>
+<div style="width:360px;height:740px;border-radius:40px;background:var(--color-bg);box-shadow:0 20px 50px rgba(0,0,0,.12);overflow:hidden;display:flex;flex-direction:column;position:relative;">
+<div style="padding:48px 24px 0;display:flex;flex-direction:column;align-items:center;gap:4px;">
+<div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--color-accent-700);">Tokyo</div>
+<div style="font-family:var(--font-heading);font-weight:400;font-size:36px;line-height:1;">Japan Eateries</div>
+<div style="font-family:var(--font-heading);font-style:italic;font-size:16px;font-feature-settings:'tnum';">local time · 10:52 am</div>
+</div>
+<div style="margin:22px 24px 0;padding:11px 14px;border:1px solid var(--color-accent);border-radius:4px;font-size:13px;color:#6b6760;">What do you want to eat?</div>
+<div style="margin:24px 24px 0;display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--color-divider);padding-bottom:6px;"><span style="font-family:var(--font-heading);font-size:22px;font-weight:600;">Browse by food</span><span style="font-size:12px;font-style:italic;color:var(--color-accent-700);">See all</span></div>
+<div style="margin:14px 24px 0;display:grid;grid-template-columns:repeat(5,1fr);gap:8px;">
+<sc-for list="{{ cats }}" as="c" hint-placeholder-count="5"><div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><div style="width:50px;height:50px;border:1px solid var(--color-divider);border-radius:4px;background:repeating-linear-gradient(135deg,transparent 0 6px,rgba(182,130,53,.12) 6px 7px);"></div><span style="font-size:11px;">{{ c }}</span></div></sc-for>
+</div>
+<div style="margin:24px 24px 0;display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--color-divider);padding-bottom:6px;"><span style="font-family:var(--font-heading);font-size:22px;font-weight:600;">Recommendation</span><span style="font-size:12px;font-style:italic;color:var(--color-accent-700);">See all</span></div>
+<div style="margin:14px 24px 0;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+<sc-for list="{{ recs }}" as="r" hint-placeholder-count="2"><div style="border:1px solid var(--color-divider);border-radius:4px;padding:8px;display:flex;flex-direction:column;gap:6px;"><div style="height:92px;border:4px solid #fff;background:repeating-linear-gradient(135deg,#e8e2d8 0 6px,#ded6c9 6px 7px);"></div><span style="font-family:var(--font-heading);font-size:19px;font-weight:600;line-height:1;">{{ r.name }}</span><span style="font-size:11px;color:#6b6760;">{{ r.city }} · <span style="font-feature-settings:'tnum';">{{ r.price }}</span></span></div></sc-for>
+</div>
+<div style="margin-top:auto;border-top:1px solid var(--color-divider);padding:14px 32px 26px;display:flex;justify-content:space-between;font-size:12px;"><span style="border-bottom:1px solid var(--color-accent);color:var(--color-accent-700);">Home</span><span>Saved</span><span>Orders</span><span>Profile</span></div>
+</div>
+<div style="display:flex;gap:6px;"><div style="flex:1;height:36px;background:#f3f2f2;border:1px solid #d8d5d0;"></div><div style="flex:1;height:36px;background:#201f1d;"></div><div style="flex:1;height:36px;background:#b68235;"></div><div style="flex:1;height:36px;background:#8a5f22;"></div></div>
+<p style="margin:0;font-size:13px;line-height:1.5;text-wrap:pretty;">Paper ground, ink text, gold as stroke only. Menu reads like a printed card; the playful 3D renders would be framed as plates.</p>
+</div>
+
+<!-- 1b Bold orange -->
+<div id="1b" style="display:flex;flex-direction:column;gap:20px;width:360px;">
+<div style="display:flex;align-items:center;gap:12px;"><span style="font-family:ui-monospace,monospace;font-size:13px;padding:3px 9px;border:1px solid #201f1d;border-radius:20px;">1b</span><span style="font-size:15px;font-weight:600;">Street poster — Anton / Manrope</span></div>
+<div style="width:360px;height:740px;border-radius:40px;background:linear-gradient(#FFE3BE,#FFF7EC 38%);box-shadow:0 20px 50px rgba(0,0,0,.12);overflow:hidden;display:flex;flex-direction:column;font-family:Manrope,sans-serif;color:#1E1A16;">
+<div style="padding:48px 24px 0;display:flex;flex-direction:column;align-items:center;gap:6px;">
+<div style="font-size:12px;font-weight:600;">Tokyo</div>
+<div style="font-family:Anton,sans-serif;font-size:38px;line-height:1;letter-spacing:.02em;">JAPAN EATERIES</div>
+<div style="font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;">LOCAL TIME · 10:52 AM</div>
+</div>
+<div style="margin:22px 24px 0;padding:13px 16px;background:#fff;border-radius:14px;font-size:13px;color:#8a8278;box-shadow:0 4px 14px rgba(242,154,30,.18);">What do you want to eat?</div>
+<div style="margin:24px 24px 0;display:flex;justify-content:space-between;align-items:baseline;"><span style="font-size:17px;font-weight:800;">Browse by Food</span><span style="font-size:12px;font-weight:600;color:#C46F00;">See All</span></div>
+<div style="margin:12px 24px 0;display:grid;grid-template-columns:repeat(5,1fr);gap:8px;">
+<sc-for list="{{ cats }}" as="c" hint-placeholder-count="5"><div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><div style="width:50px;height:50px;border-radius:14px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);"></div><span style="font-size:11px;font-weight:600;">{{ c }}</span></div></sc-for>
+</div>
+<div style="margin:24px 24px 0;display:flex;justify-content:space-between;align-items:baseline;"><span style="font-size:17px;font-weight:800;">Recommendation</span><span style="font-size:12px;font-weight:600;color:#C46F00;">See All</span></div>
+<div style="margin:12px 24px 0;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+<sc-for list="{{ recs }}" as="r" hint-placeholder-count="2"><div style="background:#fff;border-radius:18px;padding:8px;display:flex;flex-direction:column;gap:5px;box-shadow:0 4px 14px rgba(0,0,0,.05);"><div style="height:96px;border-radius:12px;background:#FFE9CC;"></div><span style="font-size:15px;font-weight:800;">{{ r.name }}</span><span style="font-size:11px;color:#8a8278;">{{ r.city }} · {{ r.price }}</span></div></sc-for>
+</div>
+<div style="margin:auto 24px 22px;background:#fff;border-radius:22px;padding:8px;display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:600;box-shadow:0 6px 18px rgba(0,0,0,.08);"><span style="background:#F29A1E;color:#1E1A16;padding:9px 16px;border-radius:16px;">Home</span><span style="padding:0 10px;">Saved</span><span style="padding:0 10px;">Orders</span><span style="padding:0 10px;">Profile</span></div>
+</div>
+<div style="display:flex;gap:6px;"><div style="flex:1;height:36px;background:#FFF7EC;border:1px solid #eadcc6;"></div><div style="flex:1;height:36px;background:#FFE3BE;"></div><div style="flex:1;height:36px;background:#F29A1E;"></div><div style="flex:1;height:36px;background:#1E1A16;"></div></div>
+<p style="margin:0;font-size:13px;line-height:1.5;text-wrap:pretty;">Closest to the reference. A condensed display face gives the headline more punch than the original wide sans; Manrope keeps the UI soft and legible.</p>
+</div>
+
+<!-- 1c Washi -->
+<div id="1c" style="display:flex;flex-direction:column;gap:20px;width:360px;">
+<div style="display:flex;align-items:center;gap:12px;"><span style="font-family:ui-monospace,monospace;font-size:13px;padding:3px 9px;border:1px solid #201f1d;border-radius:20px;">1c</span><span style="font-size:15px;font-weight:600;">Washi — Shippori Mincho / Zen Kaku</span></div>
+<div style="width:360px;height:740px;border-radius:40px;background:#F4EFE6;box-shadow:0 20px 50px rgba(0,0,0,.12);overflow:hidden;display:flex;flex-direction:column;font-family:'Zen Kaku Gothic New',sans-serif;color:#1B1F1D;">
+<div style="padding:44px 24px 0;display:flex;justify-content:space-between;align-items:flex-start;">
+<div style="display:flex;flex-direction:column;gap:6px;"><div style="font-size:12px;letter-spacing:.1em;">TOKYO · 東京</div><div style="font-family:'Shippori Mincho',serif;font-weight:700;font-size:34px;line-height:1.05;">Japan<br>Eateries</div></div>
+<div style="writing-mode:vertical-rl;font-family:'Shippori Mincho',serif;font-size:14px;color:#B8321F;border-left:1px solid #B8321F;padding-left:6px;height:88px;">食堂めぐり</div>
+</div>
+<div style="margin:6px 24px 0;font-size:12px;font-variant-numeric:tabular-nums;color:#4a4f4c;">Local time 10:52 AM</div>
+<div style="margin:18px 24px 0;padding:12px 14px;background:#FBF8F2;border:1px solid #d9d0c1;border-radius:2px;font-size:13px;color:#6d706b;">What do you want to eat?</div>
+<div style="margin:24px 24px 0;display:flex;justify-content:space-between;align-items:baseline;"><span style="font-family:'Shippori Mincho',serif;font-size:19px;font-weight:700;">Browse by Food</span><span style="font-size:12px;color:#B8321F;">See all</span></div>
+<div style="margin:12px 24px 0;display:grid;grid-template-columns:repeat(5,1fr);gap:8px;">
+<sc-for list="{{ cats }}" as="c" hint-placeholder-count="5"><div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><div style="width:50px;height:50px;border-radius:50%;background:#E9E0D0;"></div><span style="font-size:11px;">{{ c }}</span></div></sc-for>
+</div>
+<div style="margin:24px 24px 0;display:flex;justify-content:space-between;align-items:baseline;"><span style="font-family:'Shippori Mincho',serif;font-size:19px;font-weight:700;">Recommendation</span><span style="font-size:12px;color:#B8321F;">See all</span></div>
+<div style="margin:12px 24px 0;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+<sc-for list="{{ recs }}" as="r" hint-placeholder-count="2"><div style="display:flex;flex-direction:column;gap:6px;"><div style="height:110px;background:#E9E0D0;border-radius:2px;"></div><span style="font-family:'Shippori Mincho',serif;font-size:16px;font-weight:700;">{{ r.name }}</span><span style="font-size:11px;color:#4a4f4c;">{{ r.city }} · {{ r.price }}</span></div></sc-for>
+</div>
+<div style="margin-top:auto;background:#1B1F1D;color:#F4EFE6;padding:16px 30px 28px;display:flex;justify-content:space-between;font-size:12px;"><span style="color:#fff;border-bottom:2px solid #D2462C;padding-bottom:2px;">Home</span><span>Saved</span><span>Orders</span><span>Profile</span></div>
+</div>
+<div style="display:flex;gap:6px;"><div style="flex:1;height:36px;background:#F4EFE6;border:1px solid #d9d0c1;"></div><div style="flex:1;height:36px;background:#E9E0D0;"></div><div style="flex:1;height:36px;background:#D2462C;"></div><div style="flex:1;height:36px;background:#1B1F1D;"></div></div>
+<p style="margin:0;font-size:13px;line-height:1.5;text-wrap:pretty;">Rice-paper ground, sumi ink, vermilion as the seal color. Both faces carry Japanese glyphs, so bilingual labels set cleanly.</p>
+</div>
+
+<!-- 1d Matcha night -->
+<div id="1d" style="display:flex;flex-direction:column;gap:20px;width:360px;">
+<div style="display:flex;align-items:center;gap:12px;"><span style="font-family:ui-monospace,monospace;font-size:13px;padding:3px 9px;border:1px solid #201f1d;border-radius:20px;">1d</span><span style="font-size:15px;font-weight:600;">Izakaya night — Bricolage / Karla</span></div>
+<div style="width:360px;height:740px;border-radius:40px;background:#16181A;box-shadow:0 20px 50px rgba(0,0,0,.2);overflow:hidden;display:flex;flex-direction:column;font-family:Karla,sans-serif;color:#EDEAE2;">
+<div style="padding:48px 24px 0;display:flex;flex-direction:column;gap:6px;">
+<div style="display:flex;justify-content:space-between;font-size:12px;font-variant-numeric:tabular-nums;color:#a9aca4;"><span>Tokyo</span><span>10:52 AM</span></div>
+<div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:44px;line-height:.95;letter-spacing:-.02em;">Japan<br><span style="color:#B5D173;">eateries.</span></div>
+</div>
+<div style="margin:20px 24px 0;padding:13px 16px;background:#23262A;border-radius:999px;font-size:13px;color:#a9aca4;">What do you want to eat?</div>
+<div style="margin:24px 24px 0;display:flex;justify-content:space-between;align-items:baseline;"><span style="font-family:'Bricolage Grotesque',sans-serif;font-size:18px;font-weight:700;">Browse by food</span><span style="font-size:12px;color:#B5D173;">See all</span></div>
+<div style="margin:12px 24px 0;display:flex;gap:8px;flex-wrap:wrap;">
+<sc-for list="{{ cats }}" as="c" hint-placeholder-count="5"><span style="font-size:12px;padding:7px 12px;border-radius:999px;border:1px solid #3a3e43;">{{ c }}</span></sc-for>
+</div>
+<div style="margin:24px 24px 0;display:flex;justify-content:space-between;align-items:baseline;"><span style="font-family:'Bricolage Grotesque',sans-serif;font-size:18px;font-weight:700;">Recommendation</span><span style="font-size:12px;color:#B5D173;">See all</span></div>
+<div style="margin:12px 24px 0;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+<sc-for list="{{ recs }}" as="r" hint-placeholder-count="2"><div style="background:#23262A;border-radius:20px;padding:8px;display:flex;flex-direction:column;gap:5px;"><div style="height:120px;border-radius:14px;background:#2E3236;"></div><span style="font-family:'Bricolage Grotesque',sans-serif;font-size:16px;font-weight:700;padding:0 4px;">{{ r.name }}</span><span style="font-size:11px;color:#a9aca4;padding:0 4px 4px;">{{ r.city }} · {{ r.price }}</span></div></sc-for>
+</div>
+<div style="margin:auto 24px 22px;background:#23262A;border-radius:999px;padding:7px;display:flex;justify-content:space-between;align-items:center;font-size:12px;"><span style="background:#B5D173;color:#16181A;font-weight:600;padding:9px 16px;border-radius:999px;">Home</span><span style="padding:0 10px;">Saved</span><span style="padding:0 10px;">Orders</span><span style="padding:0 10px;">Profile</span></div>
+</div>
+<div style="display:flex;gap:6px;"><div style="flex:1;height:36px;background:#16181A;"></div><div style="flex:1;height:36px;background:#23262A;"></div><div style="flex:1;height:36px;background:#B5D173;"></div><div style="flex:1;height:36px;background:#EDEAE2;border:1px solid #d8d5d0;"></div></div>
+<p style="margin:0;font-size:13px;line-height:1.5;text-wrap:pretty;">Dark mode with matcha green. Warm food renders pop against charcoal; category tiles become text chips.</p>
+</div>
+
+</div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      cats: ['Ramen', 'Sushi', 'Yakitori', 'Onigiri', 'Mochi'],
+      recs: [{ name: 'Udon', city: 'Tokyo', price: '¥980' }, { name: 'Oden', city: 'Osaka', price: '¥1,200' }]
+    };
+  }
+}
+</script>
+</body>
+</html>
