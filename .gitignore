@@ -42,3 +42,10 @@ example
 /ios
 /android
 
+# Python / AI
+ai/.venv*/
+__pycache__/
+*.pyc
+ai/dataset/
+ai/dataset_clean/
+ai/runs/
