@@ -23,7 +23,7 @@ import { TOOLS, runTool, type ToolContext } from './tools.ts';
  * briefly first. Once a model answers, that agent stays on it for the run.
  */
 /** Plans and writes the farmer-facing answer. */
-export const ORCHESTRATOR_MODELS = ['gemini-3.5-flash', 'gemini-3.6-flash', 'gemini-3.7-flash', 'gemini-3.8-flash', 'gemini-3.5-flash-lite'];
+export const ORCHESTRATOR_MODELS = ['gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite'];
 /** Narrow, tool-heavy tasks; lighter models spread the quota. */
 export const SPECIALIST_MODELS = ['gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-3.5-flash', 'gemini-3.6-flash'];
 const OVERLOAD_RETRY_MS = 2000;

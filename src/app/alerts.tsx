@@ -1,9 +1,11 @@
-import { Check, MessageCircle } from 'lucide-react-native';
+import { router } from 'expo-router';
+import { Check, MessageCircle, X } from 'lucide-react-native';
 import { Fragment, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { Screen } from '@/components/screen';
 import { Badge } from '@/components/ui/badge';
+import { IconButton } from '@/components/ui/button';
 import { ScreenTitle, SectionHeader } from '@/components/ui/section-header';
 import { Card, Divider, IconWell } from '@/components/ui/surface';
 import { Txt } from '@/components/ui/text';
@@ -17,14 +19,20 @@ const DOT: Record<AlertTone, string> = {
   success: Colors.success,
 };
 
+/** Opened from the bell on Home, Market, Disease and the dashboard. */
 export default function AlertsScreen() {
+  const close = () => (router.canGoBack() ? router.back() : router.replace('/home'));
   const [on, setOn] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(ALERT_CATEGORIES.map((c) => [c.id, c.on])),
   );
 
   return (
-    <Screen>
-      <ScreenTitle kicker="Sent to LINE as they happen" title="Alerts" />
+    <Screen withTabBar={false}>
+      <ScreenTitle
+        kicker="Sent to LINE as they happen"
+        title="Alerts"
+        right={<IconButton icon={X} label="Close alerts" onPress={close} />}
+      />
 
       <Card style={styles.line}>
         <IconWell icon={MessageCircle} size={48} bg={Colors.successBg} fg={Colors.successFg} />
