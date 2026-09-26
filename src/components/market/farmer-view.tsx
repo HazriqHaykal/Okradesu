@@ -49,9 +49,9 @@ import {
 import { marketActions, useMarket } from '@/state/market-store';
 import type { Listing, ListingStatus } from '@/types/market';
 
-/** Alerts and listings shown before "Show all". */
-const ALERT_LIMIT = 4;
-const LISTING_LIMIT = 6;
+/** Alerts and listings shown before "See all", like Home's task list. */
+const ALERT_LIMIT = 3;
+const LISTING_LIMIT = 3;
 
 const STATUS_TONE: Record<ListingStatus, BadgeTone> = { open: 'accent', reserved: 'success', sold: 'neutral' };
 
@@ -320,7 +320,7 @@ function SurplusAlerts({
         );
       })}
       {alerts.length > ALERT_LIMIT ? (
-        <ShowAll open={showAll} count={alerts.length} noun="alerts" onToggle={() => setShowAll((s) => !s)} />
+        <ShowAll open={showAll} count={alerts.length} onToggle={() => setShowAll((s) => !s)} />
       ) : null}
       <Txt variant="caption" color={Colors.textSecondary}>
         Surplus listings go out {Math.round(SURPLUS_DISCOUNT * 100)}% off so they sell before the pods get tough.
@@ -408,21 +408,22 @@ function MyListings({
         })}
       </Card>
       {sorted.length > LISTING_LIMIT ? (
-        <ShowAll open={showAll} count={sorted.length} noun="listings" onToggle={() => setShowAll((s) => !s)} />
+        <ShowAll open={showAll} count={sorted.length} onToggle={() => setShowAll((s) => !s)} />
       ) : null}
     </View>
   );
 }
 
-function ShowAll({ open, count, noun, onToggle }: { open: boolean; count: number; noun: string; onToggle: () => void }) {
+/** Same toggle as Home's task list. */
+function ShowAll({ open, count, onToggle }: { open: boolean; count: number; onToggle: () => void }) {
   return (
     <Button
-      label={open ? 'Show fewer' : `Show all ${count} ${noun}`}
+      label={open ? 'Show fewer' : `See all ${count}`}
       variant="ghost"
-      size="md"
+      size="sm"
       icon={open ? ChevronUp : ChevronDown}
-      block
       onPress={onToggle}
+      style={{ alignSelf: 'center' }}
     />
   );
 }
