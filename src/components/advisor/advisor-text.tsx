@@ -1,4 +1,14 @@
-import { CloudRain, Fan, ListChecks, RadioTower, Sprout, Store, type LucideIcon } from 'lucide-react-native';
+import {
+  ChevronDown,
+  ChevronUp,
+  CloudRain,
+  Fan,
+  ListChecks,
+  RadioTower,
+  Sprout,
+  Store,
+  type LucideIcon,
+} from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
@@ -8,9 +18,6 @@ import { Colors } from '@/constants/theme';
 
 type Item = { topic: string; icon: LucideIcon; text: string; sources: string[] };
 type Parsed = { headline: string; items: Item[]; notes: string[] };
-
-/** Bullets longer than this start collapsed, with "Show more". */
-const CLAMP_CHARS = 140;
 
 const TOPICS: { topic: string; icon: LucideIcon; words: RegExp }[] = [
   { topic: 'Weather', icon: CloudRain, words: /rain|weather|flood|landslide|storm|irrigat|water/i },
@@ -121,37 +128,49 @@ export function AdvisorText({ text }: { text: string }) {
   );
 }
 
+/** First sentence only, so each task is one short line until the farmer taps it. */
+function firstSentence(text: string) {
+  const m = text.match(/^.+?[.!?](?=\s|$)/);
+  return m ? m[0] : text;
+}
+
 function TaskRow({ item }: { item: Item }) {
-  const long = item.text.length > CLAMP_CHARS;
+  const short = firstSentence(item.text);
+  const more = short.length < item.text.length || item.sources.length > 0;
   const [open, setOpen] = useState(false);
   return (
-    <View style={styles.row}>
-      <IconWell icon={item.icon} size={36} radius={10} />
-      <View style={{ flex: 1, gap: 4 }}>
+    <Pressable
+      accessibilityRole="button"
+      aria-expanded={open}
+      disabled={!more}
+      onPress={() => setOpen((o) => !o)}
+      style={styles.row}>
+      <IconWell icon={item.icon} size={32} radius={10} />
+      <View style={{ flex: 1, gap: 2 }}>
         <Txt variant="micro" color={Colors.textAccent}>
           {item.topic}
         </Txt>
-        <Txt variant="bodyLg" color={Colors.textPrimary} numberOfLines={long && !open ? 3 : undefined}>
-          {item.text}
+        <Txt variant="bodyLg" color={Colors.textPrimary} numberOfLines={open ? undefined : 2}>
+          {open ? item.text : short}
         </Txt>
-        {long ? (
-          <Pressable accessibilityRole="button" onPress={() => setOpen((o) => !o)} hitSlop={8}>
-            <Txt variant="small" weight={700} color={Colors.textAccent}>
-              {open ? 'Show less' : 'Show more'}
-            </Txt>
-          </Pressable>
-        ) : null}
-        {item.sources.length ? (
+        {open && item.sources.length ? (
           <Txt variant="caption" color={Colors.textSecondary}>
             From {item.sources.join(' · ')}
           </Txt>
         ) : null}
       </View>
-    </View>
+      {more ? (
+        open ? (
+          <ChevronUp size={16} color={Colors.textSecondary} strokeWidth={2.5} />
+        ) : (
+          <ChevronDown size={16} color={Colors.textSecondary} strokeWidth={2.5} />
+        )
+      ) : null}
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   headline: { lineHeight: 24 },
-  row: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, paddingVertical: 12 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10 },
 });

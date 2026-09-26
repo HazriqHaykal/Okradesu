@@ -1,25 +1,26 @@
-import { Bell } from 'lucide-react-native';
+import { Bell, Sparkles } from 'lucide-react-native';
 import { StyleSheet, View } from 'react-native';
 
 import { AgentChat } from '@/components/advisor/agent-chat';
 import { HeroBackground, Screen } from '@/components/screen';
 import { IconButton } from '@/components/ui/button';
-import { ScreenTitle } from '@/components/ui/section-header';
-import { Card } from '@/components/ui/surface';
+import { Card, IconWell } from '@/components/ui/surface';
 import { Txt } from '@/components/ui/text';
 import { Colors } from '@/constants/theme';
 import { agentAvailable } from '@/services/agent';
 
 const title = (
-  <ScreenTitle
-    kicker="AI agent team · all farms"
-    title="Advisor"
-    right={<IconButton icon={Bell} label="Alerts" href="/alerts" />}
-  />
+  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+    <IconWell icon={Sparkles} size={40} />
+    <Txt variant="displaySm" accessibilityRole="header" style={{ flex: 1 }}>
+      Okradesu AI
+    </Txt>
+    <IconButton icon={Bell} label="Alerts" href="/alerts" />
+  </View>
 );
 
 /**
- * AI advisor: just a chat with the agent team (an orchestrator and Monitor,
+ * Okradesu AI: just a chat with the agent team (an orchestrator and Monitor,
  * Crop Health, Harvest and Market specialists). This morning's plan opens the
  * conversation. The middle tab.
  */
@@ -30,8 +31,8 @@ export default function AdvisorScreen() {
         {title}
         <Card style={{ padding: 16 }}>
           <Txt variant="body" color={Colors.textBody}>
-            The AI advisor needs Supabase. Add EXPO_PUBLIC_SUPABASE_URL and
-            EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY to .env.local and restart the app.
+            Okradesu AI needs Supabase. Add EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+            to .env.local and restart the app.
           </Txt>
         </Card>
       </Screen>

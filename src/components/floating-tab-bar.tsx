@@ -26,7 +26,7 @@ export function FloatingTabBar({ children }: TabListProps) {
 type TabButtonProps = TabTriggerSlotProps & {
   icon: LucideIcon;
   label: string;
-  /** The raised round button in the middle (the AI Advisor). */
+  /** The raised round button in the middle (Okradesu AI). */
   highlight?: boolean;
 };
 

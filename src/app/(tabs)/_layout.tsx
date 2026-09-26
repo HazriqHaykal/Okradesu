@@ -16,7 +16,7 @@ export default function TabLayout() {
             <TabButton icon={Sprout} label="Harvest" />
           </TabTrigger>
           <TabTrigger name="advisor" href="/advisor" asChild>
-            <TabButton icon={Sparkles} label="AI Advisor" highlight />
+            <TabButton icon={Sparkles} label="Okradesu AI" highlight />
           </TabTrigger>
           <TabTrigger name="disease" href="/disease" asChild>
             <TabButton icon={Leaf} label="Disease" />

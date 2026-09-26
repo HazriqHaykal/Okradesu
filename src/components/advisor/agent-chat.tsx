@@ -1,4 +1,12 @@
-import { ChevronDown, ChevronUp, MessageCircle, RotateCcw, Send, Sunrise } from 'lucide-react-native';
+import {
+  ChevronDown,
+  ChevronUp,
+  ListChecks,
+  MessageCircle,
+  RotateCcw,
+  Send,
+  Sunrise,
+} from 'lucide-react-native';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -122,12 +130,12 @@ export function AgentChat({ header }: { header: ReactNode }) {
             text={briefing.summary}
             trace={briefing.trace ?? []}
             proposals={briefing.proposals}
+            foldProposals
           />
         ) : (
           <Card style={styles.bubbleAi}>
             <Txt variant="bodyLg" color={Colors.textBody}>
-              Hi! I check your farms&apos; sensors, cameras, weather and market for you. Ask me anything, or
-              tap a question below.
+              Hi! Ask me anything about your farms, or tap a question below.
             </Txt>
           </Card>
         )}
@@ -168,7 +176,7 @@ export function AgentChat({ header }: { header: ReactNode }) {
         <View style={styles.askRow}>
           <SearchField
             icon={MessageCircle}
-            label="Ask the advisor"
+            label="Ask Okradesu AI"
             placeholder={busy ? 'The agents are checking your farms…' : 'Ask about your farms'}
             value={question}
             onChangeText={setQuestion}
@@ -183,19 +191,26 @@ export function AgentChat({ header }: { header: ReactNode }) {
   );
 }
 
-/** One advisor answer: the readable plan, its action cards, and "How I checked" folded away. */
+/**
+ * One advisor answer: the readable plan, its action cards, and "How I checked"
+ * folded away. With `foldProposals`, the cards hide behind one button so the
+ * morning plan stays short.
+ */
 function AdvisorBubble({
   label,
   text,
   trace,
   proposals,
+  foldProposals,
 }: {
   label?: string;
   text: string;
   trace: Trace;
   proposals: Proposal[];
+  foldProposals?: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const [showActions, setShowActions] = useState(!foldProposals);
   const sources = trace.flatMap((x) => x.sources ?? []);
   return (
     <View style={{ gap: 8 }}>
@@ -233,9 +248,21 @@ function AdvisorBubble({
           </View>
         ) : null}
       </Card>
-      {proposals.map((p) => (
-        <ProposalCard key={p.id} proposal={p} />
-      ))}
+      {foldProposals && proposals.length ? (
+        <Button
+          label={
+            showActions
+              ? 'Hide actions'
+              : `${proposals.length} ${proposals.length === 1 ? 'action' : 'actions'} to confirm`
+          }
+          icon={showActions ? ChevronUp : ListChecks}
+          variant="secondary"
+          size="sm"
+          onPress={() => setShowActions((s) => !s)}
+          style={{ alignSelf: 'flex-start' }}
+        />
+      ) : null}
+      {showActions ? proposals.map((p) => <ProposalCard key={p.id} proposal={p} />) : null}
     </View>
   );
 }
