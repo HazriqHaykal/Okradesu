@@ -1,0 +1,8 @@
+# Supabase CLI settings for this repo (project linked with `supabase link`).
+
+# The app has no login yet and the 05:45 briefing (pg_cron) sends no user
+# token, so the agent function must not require one. Without this, a plain
+# `supabase functions deploy agent` would turn JWT checks on and every call
+# from the app would be refused.
+[functions.agent]
+verify_jwt = false
