@@ -16,8 +16,8 @@ import {
   Warehouse,
   type LucideIcon,
 } from 'lucide-react-native';
-import { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { WeatherCard } from '@/components/monitor/farm-monitor';
 import { DemoTrigger } from '@/components/monitor/demo-panel';
@@ -29,8 +29,26 @@ import { Chip, ChipRow } from '@/components/ui/chip';
 import { ScreenTitle, SectionHeader } from '@/components/ui/section-header';
 import { Card, IconWell } from '@/components/ui/surface';
 import { Txt } from '@/components/ui/text';
-import { Colors, Radius, Shadow } from '@/constants/theme';
-import { FARMS, FARMS_ONLINE, LAST_SCAN, TOTAL_PODS_TODAY, type Farm } from '@/data/farms';
+import { Colors, Palette, Radius, Shadow } from '@/constants/theme';
+import { LAST_SCAN } from '@/data/farms';
+import { FARMER, displayName, greeting } from '@/data/profile';
+import { useFarms } from '@/hooks/use-farms';
+import { useWeather } from '@/hooks/use-weather';
+import {
+  DEVICE_RULES,
+  alertsFor,
+  type FarmType,
+  type MonitorFarm,
+} from '@/data/monitor';
+
+type Filter = 'all' | FarmType;
+
+
+const openFarm = (farm: MonitorFarm | string, view?: 'control') =>
+  router.push({
+    pathname: '/home/farm/[id]',
+    params: { id: typeof farm === 'string' ? farm : farm.id, ...(view ? { view } : {}) },
+  });
 
 export default function HomeScreen() {
   const { weather } = useWeather();
@@ -85,7 +103,8 @@ export default function HomeScreen() {
           <Badge label={`${farms.length} farms`} tone="neutral" />
         </View>
         <Txt variant="body" weight={500}>
-          Best picked before 11:00, while pods are under 10 cm. 12 more turn ready tomorrow.
+          Best picked before 11:00, while pods are under 10 cm.
+          {weather.skipWatering ? ' Pick outdoor fields first, rain is coming.' : ''}
         </Txt>
         <Button label="Open harvest map" variant="surface" size="md" icon={ArrowRight} block href="/harvest" />
       </View>
@@ -188,8 +207,12 @@ export default function HomeScreen() {
 
       <View style={styles.section}>
         <SectionHeader title="Browse by Farm" />
-        <View style={styles.tiles}>
-          {FARMS.map((f) => (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.tileScroll}
+          contentContainerStyle={styles.tiles}>
+          {farms.map((f) => (
             <FarmTile key={f.id} farm={f} />
           ))}
         </ScrollView>
@@ -405,7 +428,8 @@ const styles = StyleSheet.create({
   controlDivider: { borderBottomWidth: 1, borderBottomColor: Colors.borderSubtle },
   controlAction: { flexDirection: 'row', alignItems: 'center', gap: 2 },
   section: { marginTop: 24, gap: 12 },
-  tiles: { flexDirection: 'row', justifyContent: 'space-between' },
+  tileScroll: { marginHorizontal: -24, flexGrow: 0 },
+  tiles: { gap: 6, paddingHorizontal: 24, paddingVertical: 4 },
   tile: { alignItems: 'center', gap: 6, width: 72 },
   tileBox: {
     width: 54,

@@ -12,7 +12,6 @@ import {
   Droplet,
   FlaskConical,
   Leaf,
-  Mountain,
   Sun,
   Thermometer,
   type LucideIcon,
@@ -192,52 +191,26 @@ export type MonitorFarm = {
   gatewayDown?: boolean;
 };
 
-const OUTDOOR: MonitorFarm[] = [
-  {
-    id: 'field-a',
-    hazard: 'flood',
-    name: 'Field A',
-    type: 'outdoor',
-    building: 'Riverside plot',
-    place: 'Riverside · 120 plants',
-    plants: 120,
-    day: 58,
-    podsReady: 31,
-    newFlowers: 22,
-    status: 'online',
-    icon: Sun,
-    gateway: 'G-01',
-    lastSync: '1 min ago',
-    silentFor: 0,
-    buffered: 0,
-    base: { moisture: 32, ph: 6.4, ec: 1.0, air: 29, humidity: 65, light: 1400 },
-    battery: 82,
-    inHarvest: false,
-  },
-  {
-    id: 'hillside',
-    name: 'Hillside',
-    type: 'outdoor',
-    building: 'Terraced slope',
-    place: 'Kawabe slope · 80 plants',
-    plants: 80,
-    day: 51,
-    podsReady: 18,
-    newFlowers: 11,
-    status: 'online',
-    hazard: 'landslide',
-    icon: Mountain,
-    gateway: 'G-01',
-    lastSync: '3 min ago',
-    silentFor: 0,
-    buffered: 0,
-    base: { moisture: 54, ph: 6.2, ec: 1.4, air: 27.5, humidity: 78, light: 1100 },
-    battery: 64,
-    inHarvest: false,
-  },
-];
+/** Monitor-only details per farm; names, places and pod counts come from FARMS. */
+type MonitorExtra = Pick<MonitorFarm, 'base' | 'silentFor' | 'buffered'> &
+  Partial<Pick<MonitorFarm, 'hazard' | 'battery' | 'rowLight' | 'energy'>>;
 
-const INDOOR_EXTRA: Record<string, Pick<MonitorFarm, 'base' | 'rowLight' | 'energy' | 'silentFor' | 'buffered'>> = {
+const EXTRA: Record<string, MonitorExtra> = {
+  // Outdoor: solar sensor nodes, and what heavy rain threatens there.
+  'field-a': {
+    base: { moisture: 32, ph: 6.4, ec: 1.0, air: 29, humidity: 65, light: 1400 },
+    hazard: 'landslide',
+    battery: 82,
+    silentFor: 0,
+    buffered: 0,
+  },
+  'field-b': {
+    base: { moisture: 38, ph: 6.2, ec: 1.1, air: 27.6, humidity: 70, light: 1250 },
+    hazard: 'flood',
+    battery: 64,
+    silentFor: 0,
+    buffered: 0,
+  },
   'classroom-2': {
     base: { moisture: 38, ph: 6.5, ec: 1.6, air: 27.4, humidity: 81, light: 420 },
     rowLight: [425, 418, 431, 409],
@@ -268,26 +241,27 @@ const INDOOR_EXTRA: Record<string, Pick<MonitorFarm, 'base' | 'rowLight' | 'ener
   },
 };
 
-const INDOOR: MonitorFarm[] = FARMS.map((f) => ({
-  id: f.id,
-  name: f.name,
-  type: 'indoor' as const,
-  building: f.building,
-  place: f.place,
-  plants: f.plants,
-  day: f.day,
-  podsReady: f.podsReady,
-  newFlowers: f.newFlowers,
-  status: f.status,
-  risk: f.risk,
-  icon: f.icon,
-  gateway: f.gateway,
-  lastSync: f.lastSync,
-  inHarvest: true,
-  ...INDOOR_EXTRA[f.id],
-}));
-
-export const MONITOR_FARMS: MonitorFarm[] = [...OUTDOOR, ...INDOOR];
+/** The same farms as the Harvest and Market tabs: outdoor fields first, then indoor rooms. */
+export const MONITOR_FARMS: MonitorFarm[] = [...FARMS]
+  .sort((a, b) => Number(a.kind === 'indoor') - Number(b.kind === 'indoor'))
+  .map((f) => ({
+    id: f.id,
+    name: f.name,
+    type: f.kind,
+    building: f.building,
+    place: f.place,
+    plants: f.plants,
+    day: f.day,
+    podsReady: f.podsReady,
+    newFlowers: f.newFlowers,
+    status: f.status,
+    risk: f.risk,
+    icon: f.icon,
+    gateway: f.gateway,
+    lastSync: f.lastSync,
+    inHarvest: true,
+    ...EXTRA[f.id],
+  }));
 
 export const getMonitorFarm = (id: string | undefined) =>
   MONITOR_FARMS.find((f) => f.id === id) ?? MONITOR_FARMS[0];
@@ -465,17 +439,17 @@ export type SensorNode = {
 
 const CODE: Record<string, string> = {
   'field-a': 'FA',
-  hillside: 'HS',
+  'field-b': 'FB',
   'classroom-2': 'C2',
   gymnasium: 'GY',
   'house-4': 'H4',
   'post-office': 'PO',
 };
 
-/** Signal falls off with distance from the gateway; the hillside is the far edge. */
+/** Signal falls off with distance from the gateway; the riverside field is the far edge. */
 const RSSI: Record<string, number> = {
   'field-a': -94,
-  hillside: -109,
+  'field-b': -109,
   'classroom-2': -82,
   gymnasium: -85,
   'house-4': -112,
