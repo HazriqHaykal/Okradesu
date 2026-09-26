@@ -92,6 +92,19 @@ export function FarmMonitor({
 }
 
 function LiveStatus({ farm, live }: { farm: MonitorFarm; live: Live }) {
+  if (live.neverSeen) {
+    return (
+      <View style={[styles.status, { backgroundColor: Palette.orange100 }]}>
+        <WifiOff size={16} color={Colors.textAccent} strokeWidth={2} />
+        <Txt variant="small" color={Colors.textBody} style={{ flex: 1 }}>
+          <Txt variant="small" weight={800}>
+            No readings from gateway {farm.gateway} yet.
+          </Txt>{' '}
+          They appear here as soon as it sends one.
+        </Txt>
+      </View>
+    );
+  }
   if (live.offline) {
     const mins = Math.round(live.secondsAgo / 60);
     return (

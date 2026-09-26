@@ -241,7 +241,7 @@ export function FarmerView({ scope, onScope }: { scope: Scope; onScope: (s: Scop
         </View>
       ) : overgrownListedToday ? (
         <Banner tone="success" icon={Check} title="Overgrown pods listed.">
-          Processors can reserve them in the Buyer view.
+          Pickle makers are offered them first.
         </Banner>
       ) : null}
 
@@ -346,7 +346,7 @@ function MyListings({
   if (!listings.length) {
     return (
       <EmptyNote art={<OkraPod width={56} />}>
-        No listings yet. List a surplus above and buyers can reserve it.
+        No listings yet. List a surplus above and nearby buyers are offered it.
       </EmptyNote>
     );
   }

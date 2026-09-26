@@ -2,8 +2,8 @@
  * Market Intelligence store: buyers, listings, reservations and camera
  * results, kept live. With Supabase configured it loads the tables and
  * follows realtime changes; otherwise it runs on the in-memory demo seed and
- * adds camera results every 30 s. Either way every screen sees the same
- * state, so a buyer's reservation shows up in the farmer view at once.
+ * adds camera results every 30 s. Reservations arrive from buyers outside
+ * the app (LINE, phone) and show up in the farmer view as they land.
  */
 import { useSyncExternalStore } from 'react';
 
@@ -11,7 +11,7 @@ import { MOCK_DETECTION_EVERY_MS } from '@/constants/market';
 import { DETECTIONS } from '@/data/detections';
 import { FARMS } from '@/data/farms';
 import { seedMarket } from '@/data/market-seed';
-import { availableKg, isoDay, roundKg, statusAfter } from '@/lib/forecast';
+import { isoDay, statusAfter } from '@/lib/forecast';
 import { supabase } from '@/lib/supabase';
 import type {
   Buyer,
@@ -45,7 +45,6 @@ type Backend = {
   /** Starts realtime (or the demo camera feed); returns a stop function. */
   listen(onChange: (c: Change) => void): () => void;
   createListing(input: NewListing): Promise<Listing>;
-  reserve(listingId: string, buyerId: string, kg: number): Promise<Reservation>;
   setReservationStatus(id: string, status: ReservationStatus): Promise<void>;
 };
 
@@ -109,24 +108,6 @@ const demoBackend: Backend = {
     const listing: Listing = { ...input, id: newId('lst'), status: 'open', created_at: new Date().toISOString() };
     apply({ table: 'listings', type: 'upsert', row: listing });
     return listing;
-  },
-  async reserve(listingId, buyerId, kg) {
-    await wait(LATENCY_MS);
-    const listing = state.listings.find((l) => l.id === listingId);
-    if (!listing || listing.status !== 'open') throw new Error('This listing is no longer open.');
-    const left = availableKg(listing, state.reservations);
-    if (kg <= 0 || kg > left) throw new Error(`Only ${left} kg left.`);
-    const reservation: Reservation = {
-      id: newId('res'),
-      listing_id: listingId,
-      buyer_id: buyerId,
-      quantity_kg: roundKg(kg),
-      status: 'pending',
-      created_at: new Date().toISOString(),
-    };
-    apply({ table: 'reservations', type: 'upsert', row: reservation });
-    apply({ table: 'listings', type: 'upsert', row: { ...listing, status: statusAfter(listing, state.reservations) } });
-    return reservation;
   },
   async setReservationStatus(id, status) {
     await wait(LATENCY_MS);
@@ -199,16 +180,6 @@ function supabaseBackend(db: NonNullable<typeof supabase>): Backend {
       apply({ table: 'listings', type: 'upsert', row: listing });
       return listing;
     },
-    async reserve(listingId, buyerId, kg) {
-      // Checks availability and updates the listing status in one transaction.
-      const r = cleanReservation(
-        check(
-          await db.rpc('reserve_listing', { p_listing_id: listingId, p_buyer_id: buyerId, p_quantity_kg: kg }),
-        ) as Reservation,
-      );
-      apply({ table: 'reservations', type: 'upsert', row: r });
-      return r;
-    },
     async setReservationStatus(id, status) {
       check(await db.rpc('set_reservation_status', { p_id: id, p_status: status }));
     },
@@ -255,7 +226,6 @@ export function useMarket<T>(select: (s: MarketState) => T): T {
 export const marketActions = {
   retry: start,
   createListing: (input: NewListing) => backend.createListing(input),
-  reserve: (listingId: string, buyerId: string, kg: number) => backend.reserve(listingId, buyerId, kg),
   setReservationStatus: (id: string, status: ReservationStatus) => backend.setReservationStatus(id, status),
 };
 
