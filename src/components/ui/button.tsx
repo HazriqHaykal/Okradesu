@@ -24,14 +24,14 @@ function variantStyle(variant: Variant, pressed: boolean): ViewStyle {
       };
     case 'secondary':
       return {
-        backgroundColor: pressed ? Palette.orange200 : 'transparent',
+        backgroundColor: pressed ? Palette.leaf200 : 'transparent',
         borderColor: Colors.borderStrong,
       };
     case 'ghost':
-      return { backgroundColor: pressed ? Palette.orange200 : 'transparent', borderColor: 'transparent' };
+      return { backgroundColor: pressed ? Palette.leaf200 : 'transparent', borderColor: 'transparent' };
     case 'surface':
       return {
-        backgroundColor: pressed ? Palette.orange100 : Colors.surfaceCard,
+        backgroundColor: pressed ? Palette.leaf100 : Colors.surfaceCard,
         borderColor: 'transparent',
         boxShadow: Shadow.tile,
       };
@@ -137,7 +137,7 @@ export function IconButton({
               ? Colors.accentPressed
               : Colors.accent
             : pressed
-              ? Palette.orange100
+              ? Palette.leaf100
               : Colors.surfaceCard,
           boxShadow: accent ? Shadow.glow : Shadow.tile,
         },

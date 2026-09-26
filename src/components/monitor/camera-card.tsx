@@ -73,7 +73,7 @@ export function CameraCard({
   const status: Record<Exclude<Snap, 'idle'>, { icon: typeof Check; text: string; fg: string }> = {
     sending: { icon: LoaderCircle, text: 'Asking the camera over LoRa…', fg: Colors.textAccent },
     thinking: { icon: ScanEye, text: 'Running YOLO on the Pi…', fg: Colors.textAccent },
-    queued: { icon: WifiOff, text: 'Queued, the camera will shoot when the link is back', fg: Colors.textAccent },
+    queued: { icon: WifiOff, text: 'Queued, the camera will shoot when the link is back', fg: Colors.warnFg },
     done: { icon: Check, text: `New snapshot · ${count('ready')} ready pods in view`, fg: Colors.successFg },
   };
   const st = snap === 'idle' ? null : status[snap];

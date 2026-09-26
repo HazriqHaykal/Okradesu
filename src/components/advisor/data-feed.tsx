@@ -35,7 +35,7 @@ export function AgentDataFeed() {
             {i > 0 ? <Divider /> : null}
             <View style={styles.row}>
               <View style={styles.icon}>
-                <Icon size={16} color={Palette.orange800} strokeWidth={2} />
+                <Icon size={16} color={Palette.leaf800} strokeWidth={2} />
               </View>
               <View style={{ flex: 1, gap: 2 }}>
                 <Txt variant="micro" color={Colors.textSecondary}>
@@ -70,6 +70,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Palette.orange200,
+    backgroundColor: Palette.leaf200,
   },
 });

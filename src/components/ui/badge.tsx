@@ -7,14 +7,14 @@ import { Colors, Palette, Radius } from '@/constants/theme';
 export type BadgeTone = 'accent' | 'neutral' | 'success' | 'solid' | 'danger';
 
 const TONES: Record<BadgeTone, { bg: string; fg: string }> = {
-  accent: { bg: Palette.orange200, fg: Palette.orange800 },
+  accent: { bg: Colors.warnBg, fg: Colors.warnFg },
   neutral: { bg: Colors.surfaceSunken, fg: Palette.ink700 },
   success: { bg: Colors.successBg, fg: Colors.successFg },
   solid: { bg: Colors.accent, fg: Colors.textOnAccent },
   danger: { bg: Colors.dangerBg, fg: Colors.dangerFg },
 };
 
-/** Small uppercase status pill. Tones: accent (orange), neutral, success (green), solid (orange fill), danger (red). */
+/** Small uppercase status pill. Tones: accent (amber, needs attention), neutral, success (teal), solid (green fill), danger (red). */
 export function Badge({
   label,
   tone = 'accent',

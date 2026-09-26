@@ -64,8 +64,8 @@ export function SmartControl({
   return (
     <View style={styles.wrap}>
       {!control.online ? (
-        <View style={[styles.note, { backgroundColor: Palette.orange100 }]}>
-          <WifiOff size={16} color={Colors.textAccent} strokeWidth={2} />
+        <View style={[styles.note, { backgroundColor: Palette.amber100 }]}>
+          <WifiOff size={16} color={Colors.warnFg} strokeWidth={2} />
           <Txt variant="small" color={Colors.textBody} style={{ flex: 1 }}>
             <Txt variant="small" weight={800}>
               Link down.
@@ -268,7 +268,7 @@ function CommandLine({ state }: { state: CommandState }) {
   if (!state) return null;
   const map: Record<Exclude<CommandState, null>, { icon: LucideIcon; text: string; fg: string }> = {
     sending: { icon: LoaderCircle, text: 'Sending over LoRa…', fg: Colors.textAccent },
-    queued: { icon: WifiOff, text: 'Queued · delivered when the link is back', fg: Colors.textAccent },
+    queued: { icon: WifiOff, text: 'Queued · delivered when the link is back', fg: Colors.warnFg },
     done: { icon: Check, text: 'Done · device confirmed', fg: Colors.successFg },
   };
   const m = map[state];
@@ -346,7 +346,7 @@ function LightCheck({ farm }: { farm: MonitorFarm }) {
               <View
                 style={[
                   styles.rowFill,
-                  { width: `${(v / 600) * 100}%`, backgroundColor: low ? Colors.danger : Palette.orange400 },
+                  { width: `${(v / 600) * 100}%`, backgroundColor: low ? Colors.danger : Palette.leaf400 },
                 ]}
               />
             </View>

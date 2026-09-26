@@ -48,7 +48,7 @@ export function BriefingCard() {
   return (
     <Card style={styles.card}>
       <View style={styles.head}>
-        <IconWell icon={Sunrise} size={40} bg={Palette.orange200} fg={Palette.orange800} />
+        <IconWell icon={Sunrise} size={40} bg={Palette.leaf200} fg={Palette.leaf800} />
         <View style={{ flex: 1, gap: 2 }}>
           <Txt variant="heading">Morning briefing</Txt>
           <Txt variant="small" color={Colors.textSecondary}>

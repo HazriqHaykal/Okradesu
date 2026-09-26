@@ -36,7 +36,7 @@ function Finding({ item }: { item: Trace[number] }) {
       style={styles.finding}>
       <View style={styles.head}>
         <View style={styles.icon}>
-          <Icon size={14} color={Palette.orange800} strokeWidth={2} />
+          <Icon size={14} color={Palette.leaf800} strokeWidth={2} />
         </View>
         <Txt variant="small" weight={800} style={{ flex: 1 }}>
           {AGENT_LABEL[item.agent]} agent
@@ -71,7 +71,7 @@ export function TeamIntro() {
         return (
           <View key={a} style={styles.intro}>
             <View style={styles.icon}>
-              <Icon size={14} color={Palette.orange800} strokeWidth={2} />
+              <Icon size={14} color={Palette.leaf800} strokeWidth={2} />
             </View>
             <View style={{ flex: 1 }}>
               <Txt variant="small" weight={800}>
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Palette.orange200,
+    backgroundColor: Palette.leaf200,
   },
   intro: { flexDirection: 'row', alignItems: 'center', gap: 10 },
 });

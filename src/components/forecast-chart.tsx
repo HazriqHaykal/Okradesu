@@ -85,7 +85,7 @@ export function ForecastChart({
       </View>
       <View style={styles.legend}>
         <LegendSwatch color={Colors.success} label={soldLabel} />
-        <LegendSwatch color={Palette.orange300} label={openLabel} />
+        <LegendSwatch color={Palette.amber300} label={openLabel} />
         {hotLabel ? <LegendSwatch color={Colors.danger} label={hotLabel} /> : null}
       </View>
     </View>
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
   col: { flex: 1, alignItems: 'center', gap: 6 },
   stack: { justifyContent: 'flex-end', gap: 2 },
   open: {
-    backgroundColor: Palette.orange300,
+    backgroundColor: Palette.amber300,
     borderTopLeftRadius: 6,
     borderTopRightRadius: 6,
     borderRadius: 2,

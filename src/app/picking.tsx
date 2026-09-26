@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button, IconButton } from '@/components/ui/button';
 import { Meter } from '@/components/ui/surface';
 import { Txt } from '@/components/ui/text';
-import { Colors, MaxContentWidth, Palette, Radius, Shadow } from '@/constants/theme';
+import { Colors, MaxContentWidth, Radius, Shadow } from '@/constants/theme';
 import { useDemo } from '@/data/demo';
 import { getFarm, type FarmKind } from '@/data/farms';
 import { harvestPlan, rowsLabel, type PlanRow } from '@/data/harvest';
@@ -122,7 +122,7 @@ export default function PickingScreen() {
                     {r.overdue > 0 ? <Badge label={`${r.overdue} must`} tone="danger" /> : null}
                   </View>
                   {r.overgrown > 0 ? (
-                    <Txt variant="small" color={Palette.orange800}>
+                    <Txt variant="small" color={Colors.warnFg}>
                       Also take {r.overgrown} overgrown {r.overgrown === 1 ? 'pod' : 'pods'} for the processor
                       bin.
                     </Txt>

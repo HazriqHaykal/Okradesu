@@ -29,7 +29,7 @@ import {
 
 const RISK: Record<RiskLevel, { label: string; tone: BadgeTone; dot: string }> = {
   low: { label: 'Low', tone: 'success', dot: Colors.success },
-  moderate: { label: 'Moderate', tone: 'accent', dot: Colors.accent },
+  moderate: { label: 'Moderate', tone: 'accent', dot: Colors.warn },
   high: { label: 'High', tone: 'danger', dot: Colors.danger },
 };
 
@@ -237,7 +237,7 @@ function Reading({
       style={styles.reading}
       accessible
       accessibilityLabel={value === null ? `${label}: no reading yet` : `${label} ${value} ${unit}`}>
-      <Icon size={16} color={warn ? Colors.textAccent : Colors.textSecondary} strokeWidth={2} />
+      <Icon size={16} color={warn ? Colors.warnFg : Colors.textSecondary} strokeWidth={2} />
       <Txt variant="micro" color={Colors.textSecondary} numberOfLines={2}>
         {label}
       </Txt>

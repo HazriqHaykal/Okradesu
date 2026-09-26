@@ -202,8 +202,8 @@ function AdvisorBubble({
       <Card style={styles.bubbleAi}>
         {label ? (
           <View style={styles.label}>
-            <Sunrise size={14} color={Palette.orange800} strokeWidth={2} />
-            <Txt variant="micro" color={Palette.orange800}>
+            <Sunrise size={14} color={Palette.leaf800} strokeWidth={2} />
+            <Txt variant="micro" color={Palette.leaf800}>
               {label}
             </Txt>
           </View>

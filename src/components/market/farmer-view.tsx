@@ -24,7 +24,7 @@ import { SectionHeader } from '@/components/ui/section-header';
 import { Card } from '@/components/ui/surface';
 import { Txt } from '@/components/ui/text';
 import { AVG_POD_WEIGHT_G, MIN_SURPLUS_KG, PRICE_PER_KG, SURPLUS_DISCOUNT } from '@/constants/market';
-import { Colors, Palette, Radius } from '@/constants/theme';
+import { Colors, Radius } from '@/constants/theme';
 import { FARMS } from '@/data/farms';
 import { useMarketForecast } from '@/hooks/use-market-forecast';
 import {
@@ -158,8 +158,8 @@ export function FarmerView({ scope, onScope }: { scope: Scope; onScope: (s: Scop
           label="Surplus"
           value={kg(week.surplus)}
           note={`${pct(week.surplus, week.forecast)} unsold`}
-          bg={weekLevel === 'red' ? Colors.danger : weekLevel === 'amber' ? Palette.orange200 : Colors.surfaceCard}
-          fg={weekLevel === 'red' ? Colors.surfaceCard : weekLevel === 'amber' ? Palette.orange800 : Colors.textPrimary}
+          bg={weekLevel === 'red' ? Colors.danger : weekLevel === 'amber' ? Colors.warnBg : Colors.surfaceCard}
+          fg={weekLevel === 'red' ? Colors.surfaceCard : weekLevel === 'amber' ? Colors.warnFg : Colors.textPrimary}
         />
         <StatTile
           label="Est. revenue"
@@ -209,10 +209,10 @@ export function FarmerView({ scope, onScope }: { scope: Scope; onScope: (s: Scop
           <OkraPod width={56} tone="overgrown" />
           <View style={{ flex: 1, gap: 8 }}>
             <View style={{ gap: 2 }}>
-              <Txt variant="body" weight={800} color={Palette.orange800}>
+              <Txt variant="body" weight={800} color={Colors.warnFg}>
                 {kg(overgrownKg)} overgrown, list for processors?
               </Txt>
-              <Txt variant="small" color={Palette.orange800}>
+              <Txt variant="small" color={Colors.warnFg}>
                 {overgrown.reduce((n, o) => n + o.pods, 0)} pods pass fresh-market size by tomorrow. Pickle makers pay{' '}
                 {yen(PRICE_PER_KG.overgrown)}/kg.
               </Txt>
@@ -335,6 +335,6 @@ const styles = StyleSheet.create({
     gap: 12,
     padding: 14,
     borderRadius: Radius.md,
-    backgroundColor: Palette.orange200,
+    backgroundColor: Colors.warnBg,
   },
 });

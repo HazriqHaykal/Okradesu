@@ -16,7 +16,7 @@ const CELL: Record<'picked' | 'must' | 'ready' | 'processor' | 'none', Cell> = {
   picked: { bg: Colors.successFg, fg: Colors.surfaceCard },
   must: { bg: Colors.danger, fg: Colors.surfaceCard },
   ready: { bg: Colors.accent, fg: Colors.textOnAccent },
-  processor: { bg: Palette.orange800, fg: Colors.surfaceCard },
+  processor: { bg: Colors.warnFg, fg: Colors.surfaceCard },
   none: { bg: Colors.surfaceSunken, fg: Colors.textSecondary },
 };
 
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
   bars: { flexDirection: 'row', alignItems: 'flex-end', gap: 12 },
   barCol: { flex: 1, alignItems: 'center', gap: 6 },
   bar: { width: '100%', maxWidth: 48, borderRadius: 8, backgroundColor: Colors.accent },
-  barFuture: { backgroundColor: Palette.orange300 },
+  barFuture: { backgroundColor: Palette.leaf300 },
   upcomingFoot: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   marketLink: { flexDirection: 'row', alignItems: 'center', gap: 4 },
 });

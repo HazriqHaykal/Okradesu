@@ -12,7 +12,7 @@ import { Button, IconButton } from '@/components/ui/button';
 import { SectionHeader } from '@/components/ui/section-header';
 import { Card, Divider } from '@/components/ui/surface';
 import { Txt } from '@/components/ui/text';
-import { Colors, MaxContentWidth, Palette, Radius } from '@/constants/theme';
+import { Colors, MaxContentWidth, Radius } from '@/constants/theme';
 import { useDemo } from '@/data/demo';
 import { getFarm } from '@/data/farms';
 import {
@@ -94,7 +94,7 @@ export default function RowDetailScreen() {
         <Count label="Must pick" value={det.overdue} color={Colors.dangerFg} />
         <Count label="Ready" value={det.ready} color={Colors.textAccent} />
         <Count label="Too small" value={det.small} />
-        <Count label="Overgrown" value={det.overgrown} color={Palette.orange800} />
+        <Count label="Overgrown" value={det.overgrown} color={Colors.warnFg} />
         <Count label="Flowers" value={det.flowers} color={Colors.successFg} />
       </View>
 

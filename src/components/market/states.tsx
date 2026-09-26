@@ -6,7 +6,7 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/surface';
 import { Txt } from '@/components/ui/text';
-import { Colors, Palette, Radius, Shadow } from '@/constants/theme';
+import { Colors, Radius, Shadow } from '@/constants/theme';
 
 export function MarketLoading() {
   return (
@@ -32,7 +32,7 @@ export function MarketError({ message, onRetry }: { message: string; onRetry: ()
 
 const BANNER = {
   danger: { bg: Colors.dangerBg, fg: Colors.dangerFg },
-  accent: { bg: Palette.orange200, fg: Palette.orange800 },
+  accent: { bg: Colors.warnBg, fg: Colors.warnFg },
   success: { bg: Colors.successBg, fg: Colors.successFg },
 } as const;
 

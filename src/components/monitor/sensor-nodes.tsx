@@ -139,8 +139,8 @@ function NodeRow({
             {n.role}
           </Txt>
           <View style={styles.meta}>
-            <Signal size={13} color={weak ? Colors.textAccent : Colors.textSecondary} strokeWidth={2.5} />
-            <Txt variant="caption" color={weak ? Colors.textAccent : Colors.textSecondary} tabular>
+            <Signal size={13} color={weak ? Colors.warnFg : Colors.textSecondary} strokeWidth={2.5} />
+            <Txt variant="caption" color={weak ? Colors.warnFg : Colors.textSecondary} tabular>
               {rssi} dBm
             </Txt>
             <Battery size={13} color={Colors.textSecondary} strokeWidth={2} />
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: Radius.sm,
-    backgroundColor: Palette.orange150,
+    backgroundColor: Palette.leaf150,
     alignItems: 'center',
     justifyContent: 'center',
   },

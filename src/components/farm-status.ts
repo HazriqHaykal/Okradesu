@@ -1,10 +1,10 @@
-import { Colors, Palette } from '@/constants/theme';
+import { Colors } from '@/constants/theme';
 import type { FarmAlert, MonitorFarm } from '@/data/monitor';
 
 export type FarmStatus = { label: string; dot: string; text: string; tone: 'ok' | 'warn' | 'bad' };
 
 const BAD = { dot: Colors.danger, text: Colors.dangerFg, tone: 'bad' as const };
-const WARN = { dot: Colors.accent, text: Palette.orange800, tone: 'warn' as const };
+const WARN = { dot: Colors.warn, text: Colors.warnFg, tone: 'warn' as const };
 const OK = { dot: Colors.success, text: Colors.successFg, tone: 'ok' as const };
 
 /** One or two words per farm, readable in a glance. */

@@ -36,7 +36,7 @@ type Live = ReturnType<typeof useLiveFarm>;
 
 export const LEVEL_COLOR: Record<Level, { fg: string; marker: string }> = {
   ok: { fg: Colors.textSecondary, marker: Colors.textPrimary },
-  warn: { fg: Colors.textAccent, marker: Palette.orange600 },
+  warn: { fg: Colors.warnFg, marker: Palette.amber600 },
   critical: { fg: Colors.dangerFg, marker: Colors.danger },
 };
 
@@ -94,8 +94,8 @@ export function FarmMonitor({
 function LiveStatus({ farm, live }: { farm: MonitorFarm; live: Live }) {
   if (live.neverSeen) {
     return (
-      <View style={[styles.status, { backgroundColor: Palette.orange100 }]}>
-        <WifiOff size={16} color={Colors.textAccent} strokeWidth={2} />
+      <View style={[styles.status, { backgroundColor: Palette.amber100 }]}>
+        <WifiOff size={16} color={Colors.warnFg} strokeWidth={2} />
         <Txt variant="small" color={Colors.textBody} style={{ flex: 1 }}>
           <Txt variant="small" weight={800}>
             No readings from gateway {farm.gateway} yet.
@@ -108,8 +108,8 @@ function LiveStatus({ farm, live }: { farm: MonitorFarm; live: Live }) {
   if (live.offline) {
     const mins = Math.round(live.secondsAgo / 60);
     return (
-      <View style={[styles.status, { backgroundColor: Palette.orange100 }]}>
-        <WifiOff size={16} color={Colors.textAccent} strokeWidth={2} />
+      <View style={[styles.status, { backgroundColor: Palette.amber100 }]}>
+        <WifiOff size={16} color={Colors.warnFg} strokeWidth={2} />
         <Txt variant="small" color={Colors.textBody} style={{ flex: 1 }}>
           <Txt variant="small" weight={800}>
             Offline · last reading {mins} min ago.
@@ -204,7 +204,7 @@ export function WeatherCard({ weather, compact }: { weather: Weather; compact?: 
           const Icon = d.icon;
           const wet = d.rain >= 70 || d.mm >= 5;
           return (
-            <View key={d.day} style={[styles.day, wet && { backgroundColor: Palette.orange100 }]}>
+            <View key={d.day} style={[styles.day, wet && { backgroundColor: Palette.leaf100 }]}>
               <Txt variant="caption" weight={700} color={Colors.textSecondary}>
                 {d.day}
               </Txt>
@@ -261,7 +261,7 @@ function SolarNode({ farm }: { farm: MonitorFarm }) {
 
 const SEVERITY: Record<Severity, { bg: string; fg: string; icon: LucideIcon; label: string }> = {
   critical: { bg: Colors.dangerBg, fg: Colors.dangerFg, icon: TriangleAlert, label: 'Critical' },
-  warning: { bg: Palette.orange100, fg: Colors.textAccent, icon: TriangleAlert, label: 'Warning' },
+  warning: { bg: Palette.amber100, fg: Colors.warnFg, icon: TriangleAlert, label: 'Warning' },
   info: { bg: Colors.surfaceSunken, fg: Colors.textBody, icon: Check, label: 'Info' },
 };
 
@@ -313,7 +313,7 @@ export function AlertList({ alerts, onResolve }: { alerts: FarmAlert[]; onResolv
               accessibilityLabel={`Resolve: ${a.title}`}
               onPress={() => onResolve(a.id)}
               hitSlop={6}
-              style={({ pressed }) => [styles.resolve, pressed && { backgroundColor: Palette.orange100 }]}>
+              style={({ pressed }) => [styles.resolve, pressed && { backgroundColor: Palette.leaf100 }]}>
               <Txt variant="micro" color={Colors.textPrimary}>
                 Resolve
               </Txt>
@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     borderRadius: Radius.pill,
-    backgroundColor: Palette.orange300,
+    backgroundColor: Palette.leaf300,
   },
   marker: { position: 'absolute', top: -3, width: 4, height: 12, marginLeft: -2, borderRadius: 2 },
   weather: { backgroundColor: Colors.bgApp, borderRadius: Radius.lg, padding: 14, gap: 12 },

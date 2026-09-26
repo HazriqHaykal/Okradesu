@@ -26,7 +26,7 @@ export function RenderPlaceholder({
       <Svg style={StyleSheet.absoluteFill}>
         <Defs>
           <Pattern id={id} width={11} height={11} patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-            <Rect x={0} y={0} width={1} height={11} fill={Palette.orange200} />
+            <Rect x={0} y={0} width={1} height={11} fill={Palette.leaf200} />
           </Pattern>
         </Defs>
         <Rect x={0} y={0} width="100%" height="100%" fill={`url(#${id})`} />

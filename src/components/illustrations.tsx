@@ -87,7 +87,7 @@ export const DETECTION_STYLE: Record<ItemKind, { color: string; label: string }>
   must: { color: Colors.danger, label: 'Must pick' },
   ready: { color: Colors.accent, label: 'Ready' },
   small: { color: Palette.ink300, label: 'Too small' },
-  overgrown: { color: Palette.orange800, label: 'Overgrown' },
+  overgrown: { color: Colors.warnFg, label: 'Overgrown' },
   flower: { color: Colors.success, label: 'Flower' },
 };
 
@@ -110,7 +110,7 @@ function rng(seed: number) {
 
 /**
  * Illustrated camera frame of one row with the Edge AI's boxes on it:
- * red = must pick today, orange = ready, grey = too small, brown = overgrown,
+ * red = must pick today, green = ready, grey = too small, brown = overgrown,
  * green = new flower.
  * @category Illustrations
  */

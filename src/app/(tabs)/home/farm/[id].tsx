@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     paddingRight: 8,
     minHeight: 46,
     borderRadius: Radius.md,
-    backgroundColor: Palette.orange100,
+    backgroundColor: Palette.leaf100,
   },
   link: { paddingVertical: 14, paddingHorizontal: 6 },
 });

@@ -62,7 +62,7 @@ export function AgentProgress({ runId, running }: { runId: string; running: bool
           return (
             <View key={a} style={styles.row}>
               <View style={[styles.icon, st === 'done' && styles.iconDone]}>
-                <Icon size={14} color={st === 'done' ? Colors.successFg : Palette.orange800} strokeWidth={2} />
+                <Icon size={14} color={st === 'done' ? Colors.successFg : Palette.leaf800} strokeWidth={2} />
               </View>
               <Txt variant="small" weight={800} style={styles.name} numberOfLines={1}>
                 {AGENT_LABEL[a]}
@@ -92,7 +92,7 @@ export function AgentProgress({ runId, running }: { runId: string; running: bool
         onPress={() => setOpen((o) => !o)}
         style={styles.row}>
         <View style={styles.icon}>
-          <Network size={14} color={Palette.orange800} strokeWidth={2} />
+          <Network size={14} color={Palette.leaf800} strokeWidth={2} />
         </View>
         <Txt variant="small" weight={700} color={Colors.textBody} style={{ flex: 1 }}>
           How the team worked it out · {specialists.length} {specialists.length === 1 ? 'agent' : 'agents'},{' '}
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
     gap: 8,
     padding: 12,
     borderRadius: Radius.md,
-    backgroundColor: Palette.orange100,
+    backgroundColor: Palette.leaf100,
   },
   row: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 24 },
   icon: {
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Palette.orange200,
+    backgroundColor: Palette.leaf200,
   },
   iconDone: { backgroundColor: Colors.successBg },
   name: { width: 124 },

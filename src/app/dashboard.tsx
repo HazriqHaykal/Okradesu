@@ -223,7 +223,7 @@ function Sidebar({ online, total }: { online: number; total: number }) {
               style={({ pressed }) => [
                 styles.navItem,
                 active && styles.navActive,
-                pressed && !active && { backgroundColor: Palette.orange100 },
+                pressed && !active && { backgroundColor: Palette.leaf100 },
               ]}>
               <Icon size={18} color={active ? Colors.textOnAccent : Colors.textSecondary} strokeWidth={2} />
               <Txt variant="body" weight={700} color={active ? Colors.textOnAccent : Colors.textSecondary}>
@@ -410,7 +410,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.pill,
   },
   navActive: { backgroundColor: Colors.accent, boxShadow: Shadow.glow },
-  network: { borderRadius: Radius.lg, backgroundColor: Palette.orange100, padding: 14, gap: 8 },
+  network: { borderRadius: Radius.lg, backgroundColor: Palette.leaf100, padding: 14, gap: 8 },
   main: { gap: 20, width: '100%', maxWidth: 1280, alignSelf: 'center' },
   header: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16 },
   headerStack: { flexDirection: 'column', alignItems: 'stretch' },
