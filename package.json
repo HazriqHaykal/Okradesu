@@ -46,6 +46,9 @@
   },
   "scripts": {
     "start": "expo start",
+    "dev": "concurrently \"npm run ai\" \"npm run expo\"",
+    "expo": "expo start",
+    "ai": "cd ai && .\\.venv-gpu\\Scripts\\python.exe -m uvicorn api:app --host 0.0.0.0 --port 8000",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android",
     "ios": "expo run:ios",
