@@ -42,3 +42,24 @@ example
 /ios
 /android
 
+# Python / AI (ai/): environments, datasets and training runs stay local.
+# ai/models/best.pt, ai/yolo11n.pt, ai/requirements.txt and ai/*.py ARE committed.
+ai/.venv*/
+ai/**/__pycache__/
+ai/**/*.pyc
+ai/dataset/
+ai/dataset_clean/
+ai/runs/
+__pycache__/
+*.pyc
+
+# design-sync (Claude Design): staged scripts, build output, machine state
+.ds-sync/
+ds-bundle/
+.design-sync/.cache/
+.design-sync/learnings/
+.design-sync/node_modules/
+.design-sync/pkg/dist/
+
+# Supabase CLI local state
+supabase/.temp/
