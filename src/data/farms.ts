@@ -5,16 +5,21 @@
 import {
   CloudDrizzle,
   Droplet,
+  House,
   Leaf,
   Mail,
   School,
   Sun,
   Thermometer,
-  House,
+  Tractor,
   type LucideIcon,
 } from 'lucide-react-native';
 
+import { detectionTotals } from '@/data/detections';
+
 export type FarmStatus = 'online' | 'local';
+/** Outdoor fields are the basic tier; indoor rooms are the premium add-on. */
+export type FarmKind = 'outdoor' | 'indoor';
 
 export type Sensor = {
   key: string;
@@ -31,11 +36,16 @@ export type Sensor = {
 
 export type Farm = {
   id: string;
+  kind: FarmKind;
   name: string;
   building: string;
   place: string;
   plants: number;
+  rows: number;
   day: number;
+  /** Mean air temperature over the last 24 h, from person A's node (drives the flower countdown). */
+  meanTempC: number;
+  power: string;
   podsReady: number;
   newFlowers: number;
   status: FarmStatus;
@@ -53,6 +63,7 @@ function sensors(o: {
   ec: number;
   light: number;
   soil: number;
+  outdoor?: boolean;
 }): Sensor[] {
   const humid = o.humidity > 75;
   return [
@@ -97,16 +108,27 @@ function sensors(o: {
       marker: o.humidity,
       warn: humid,
     },
-    {
-      key: 'light',
-      label: 'Light',
-      value: `${o.light}`,
-      unit: 'µmol',
-      note: 'Target 350–500',
-      icon: Sun,
-      band: [45, 20],
-      marker: (o.light / 780) * 100,
-    },
+    o.outdoor
+      ? {
+          key: 'light',
+          label: 'Sunlight',
+          value: `${o.light}`,
+          unit: 'klx',
+          note: 'Full sun 60–100 klx',
+          icon: Sun,
+          band: [50, 40],
+          marker: (o.light / 120) * 100,
+        }
+      : {
+          key: 'light',
+          label: 'Light',
+          value: `${o.light}`,
+          unit: 'µmol',
+          note: 'Target 350–500',
+          icon: Sun,
+          band: [45, 20],
+          marker: (o.light / 780) * 100,
+        },
     {
       key: 'soil',
       label: 'Soil temp',
@@ -120,16 +142,70 @@ function sensors(o: {
   ];
 }
 
-export const FARMS: Farm[] = [
+type FarmSeed = Omit<Farm, 'podsReady' | 'newFlowers'>;
+
+const SEEDS: FarmSeed[] = [
+  {
+    id: 'field-a',
+    kind: 'outdoor',
+    name: 'Field A',
+    building: 'Hinode hillside',
+    place: 'Hinode hillside · 120 plants',
+    plants: 120,
+    rows: 6,
+    day: 74,
+    meanTempC: 25.5,
+    power: 'Solar node · battery 82%',
+    status: 'online',
+    icon: Tractor,
+    gateway: 'G-02',
+    lastSync: '3 min ago',
+    sensors: sensors({
+      moisture: 42,
+      humidity: 65,
+      air: 29.0,
+      ec: 1.3,
+      light: 78,
+      soil: 26.2,
+      outdoor: true,
+    }),
+  },
+  {
+    id: 'field-b',
+    kind: 'outdoor',
+    name: 'Field B',
+    building: 'Kawabe riverside',
+    place: 'Kawabe riverside · 100 plants',
+    plants: 100,
+    rows: 5,
+    day: 68,
+    meanTempC: 24.0,
+    power: 'Solar node · battery 64%',
+    status: 'online',
+    icon: Tractor,
+    gateway: 'G-01',
+    lastSync: '6 min ago',
+    sensors: sensors({
+      moisture: 33,
+      humidity: 70,
+      air: 27.6,
+      ec: 1.1,
+      light: 64,
+      soil: 25.1,
+      outdoor: true,
+    }),
+  },
   {
     id: 'classroom-2',
+    kind: 'indoor',
     name: 'Classroom 2',
     building: 'Hinode School',
     place: 'Hinode School · 48 plants',
     plants: 48,
+    rows: 4,
     day: 62,
-    podsReady: 14,
-    newFlowers: 9,
+    meanTempC: 27.4,
+    power: 'Mains power',
     status: 'online',
     icon: School,
     gateway: 'G-02',
@@ -138,13 +214,15 @@ export const FARMS: Farm[] = [
   },
   {
     id: 'gymnasium',
+    kind: 'indoor',
     name: 'Gymnasium',
     building: 'Hinode School',
     place: 'Hinode School · 96 plants',
     plants: 96,
+    rows: 6,
     day: 55,
-    podsReady: 26,
-    newFlowers: 17,
+    meanTempC: 26.8,
+    power: 'Mains power',
     status: 'online',
     icon: School,
     gateway: 'G-02',
@@ -153,13 +231,15 @@ export const FARMS: Farm[] = [
   },
   {
     id: 'house-4',
+    kind: 'indoor',
     name: 'House 4',
     building: 'Minami vacant house',
     place: 'Minami · 32 plants',
     plants: 32,
+    rows: 3,
     day: 48,
-    podsReady: 9,
-    newFlowers: 6,
+    meanTempC: 25.9,
+    power: 'Mains power',
     status: 'local',
     icon: House,
     gateway: 'G-01',
@@ -168,13 +248,15 @@ export const FARMS: Farm[] = [
   },
   {
     id: 'post-office',
+    kind: 'indoor',
     name: 'Post Office',
     building: 'Kawabe closed branch',
     place: 'Kawabe · 40 plants',
     plants: 40,
+    rows: 4,
     day: 70,
-    podsReady: 9,
-    newFlowers: 4,
+    meanTempC: 26.1,
+    power: 'Mains power',
     status: 'online',
     risk: 'Mildew risk',
     icon: Mail,
@@ -184,29 +266,17 @@ export const FARMS: Farm[] = [
   },
 ];
 
+/** Pod and flower counts come from the camera detections, so every screen agrees. */
+export const FARMS: Farm[] = SEEDS.map((f) => {
+  const t = detectionTotals(f.id);
+  return { ...f, podsReady: t.ready, newFlowers: t.flowers };
+});
+
 export const getFarm = (id: string | undefined) => FARMS.find((f) => f.id === id) ?? FARMS[0];
 
 export const TOTAL_PODS_TODAY = FARMS.reduce((n, f) => n + f.podsReady, 0);
 export const TOTAL_PLANTS = FARMS.reduce((n, f) => n + f.plants, 0);
 export const FARMS_ONLINE = FARMS.filter((f) => f.status === 'online').length;
-
-// ── Harvest map ────────────────────────────────────────────────────
-export type PlantStage = 'ready' | 'tomorrow' | 'flowering' | 'growing';
-export type Plant = { index: number; row: number; col: number; stage: PlantStage; pods: number };
-
-export const BED_COLUMNS = 6;
-const STAGES: Record<string, PlantStage> = { R: 'ready', T: 'tomorrow', F: 'flowering', G: 'growing' };
-
-/** Daily map from the on-site camera AI, one bed laid out window-side to door. */
-export function harvestMap(farm: Farm): Plant[] {
-  const rows = 8;
-  const seed = FARMS.indexOf(farm);
-  return Array.from({ length: rows * BED_COLUMNS }, (_, i) => {
-    const stage = STAGES['GRFTRGTF'[(i * 5 + Math.floor(i / BED_COLUMNS) + seed * 3) % 8]];
-    const pods = stage === 'ready' ? (i % 3) + 1 : stage === 'tomorrow' ? (i % 2) + 1 : 0;
-    return { index: i, row: Math.floor(i / BED_COLUMNS) + 1, col: (i % BED_COLUMNS) + 1, stage, pods };
-  });
-}
 
 // ── Market ─────────────────────────────────────────────────────────
 export type ForecastDay = { day: string; sold: number; open: number };
@@ -292,6 +362,7 @@ export type AdvisorTip = {
   why: string;
   action: string;
   kind: 'fans' | 'map';
+  row?: number;
 };
 
 export const TIPS: AdvisorTip[] = [
@@ -310,6 +381,7 @@ export const TIPS: AdvisorTip[] = [
     why: 'Five pods there pass 10 cm by tomorrow and will be too tough to sell fresh.',
     action: 'Show on map',
     kind: 'map',
+    row: 3,
   },
 ];
 
@@ -338,7 +410,7 @@ export const ALERT_EVENTS: { time: string; tone: AlertTone; title: string; detai
     time: '05:45 AM',
     tone: 'accent',
     title: `${TOTAL_PODS_TODAY} pods ready to pick`,
-    detail: 'Harvest maps are ready for all 4 farms.',
+    detail: `Harvest maps are ready for all ${FARMS.length} farms.`,
   },
   {
     time: '05:10 AM',

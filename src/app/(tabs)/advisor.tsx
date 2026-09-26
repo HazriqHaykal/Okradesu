@@ -22,7 +22,14 @@ export default function AdvisorScreen() {
 
   const runTip = (tip: AdvisorTip) => {
     if (tip.kind === 'map') {
-      router.navigate({ pathname: '/harvest', params: { farm: tip.farmId } });
+      if (tip.row) {
+        router.navigate({
+          pathname: '/harvest/[farmId]/[row]',
+          params: { farmId: tip.farmId, row: String(tip.row) },
+        });
+      } else {
+        router.navigate({ pathname: '/harvest', params: { farm: tip.farmId } });
+      }
       return;
     }
     setApplied((a) => ({ ...a, [tip.id]: true }));

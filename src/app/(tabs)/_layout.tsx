@@ -12,7 +12,7 @@ export default function TabLayout() {
           <TabTrigger name="home" href="/home" resetOnFocus asChild>
             <TabButton icon={House} label="Home" />
           </TabTrigger>
-          <TabTrigger name="harvest" href="/harvest" asChild>
+          <TabTrigger name="harvest" href="/harvest" resetOnFocus asChild>
             <TabButton icon={Sprout} label="Harvest" />
           </TabTrigger>
           <TabTrigger name="market" href="/market" asChild>

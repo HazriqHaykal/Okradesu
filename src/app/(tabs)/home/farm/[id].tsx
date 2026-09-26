@@ -1,23 +1,37 @@
 import { Link, router, useLocalSearchParams } from 'expo-router';
 import { ChevronLeft, Fan, Lightbulb, RadioTower, Droplets, type LucideIcon } from 'lucide-react-native';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { RowSnapshot } from '@/components/illustrations';
 import { Screen } from '@/components/screen';
 import { Badge } from '@/components/ui/badge';
 import { IconButton } from '@/components/ui/button';
-import { RenderPlaceholder } from '@/components/ui/render-placeholder';
 import { InfoStat, SectionHeader } from '@/components/ui/section-header';
 import { Divider, IconWell } from '@/components/ui/surface';
 import { Txt } from '@/components/ui/text';
 import { Toggle } from '@/components/ui/toggle';
-import { Colors, Palette, Radius, Shadow, TabBarSpace } from '@/constants/theme';
+import { Colors, MaxContentWidth, Palette, Radius, Shadow, TabBarSpace } from '@/constants/theme';
 import { getFarm, type Sensor } from '@/data/farms';
+import { captureFor, harvestPlan } from '@/data/harvest';
 
 type DeviceId = 'led' | 'pump' | 'fan';
 
-const DEVICES: { id: DeviceId; name: string; icon: LucideIcon; auto: string; manual: string }[] = [
+type Device = { id: DeviceId; name: string; icon: LucideIcon; auto: string; manual: string };
+
+/** Outdoor fields only get dry-soil alerts; indoor rooms run pumps, LEDs and fans. */
+const OUTDOOR_DEVICES: Device[] = [
+  {
+    id: 'pump',
+    name: 'Irrigation alerts',
+    icon: Droplets,
+    auto: 'On · alert when soil is under 30%',
+    manual: 'Paused · no dry-soil alerts',
+  },
+];
+
+const INDOOR_DEVICES: Device[] = [
   {
     id: 'led',
     name: 'LED grow lights',
@@ -45,6 +59,10 @@ export default function FarmDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const farm = getFarm(id);
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const snapWidth = Math.min(width, MaxContentWidth) - 80;
+  const topRow = harvestPlan({ farmId: farm.id })[0];
+  const devices = farm.kind === 'outdoor' ? OUTDOOR_DEVICES : INDOOR_DEVICES;
   const [auto, setAuto] = useState<Record<DeviceId, boolean>>({ led: true, pump: true, fan: true });
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/home'));
@@ -55,7 +73,25 @@ export default function FarmDetailScreen() {
         <IconButton icon={ChevronLeft} label="Back" onPress={goBack} />
       </View>
       <View style={styles.renderWrap}>
-        <RenderPlaceholder label={`Live camera · ${farm.name}`} height={210} radius={Radius.xl} />
+        {topRow ? (
+          <Pressable
+            accessibilityRole="link"
+            accessibilityLabel={`Latest camera frame, row ${topRow.row}. Open row details`}
+            onPress={() =>
+              router.push({
+                pathname: '/harvest/[farmId]/[row]',
+                params: { farmId: farm.id, row: String(topRow.row) },
+              })
+            }
+            style={styles.snap}>
+            <RowSnapshot det={topRow} kind={farm.kind} seed={topRow.row} width={snapWidth} height={210} />
+            <View style={styles.snapChip}>
+              <Txt variant="caption" weight={700} color={Colors.surfaceCard}>
+                Row {topRow.row} · {captureFor(farm).label}
+              </Txt>
+            </View>
+          </Pressable>
+        ) : null}
       </View>
 
       <View style={[styles.sheet, { paddingBottom: insets.bottom + TabBarSpace }]}>
@@ -71,15 +107,17 @@ export default function FarmDetailScreen() {
         </View>
 
         <View style={styles.facts}>
-          <InfoStat label="Building" value={farm.building} />
+          <InfoStat label={farm.kind === 'outdoor' ? 'Location' : 'Building'} value={farm.building} />
           <InfoStat label="Plants" value={`${farm.plants} · day ${farm.day}`} />
           <InfoStat label="Last sync" value={farm.lastSync} />
         </View>
 
         <Txt variant="body" color={Colors.textBody}>
-          {farm.status === 'online'
-            ? `Linked through LoRa gateway ${farm.gateway}. If the signal drops, the controller in this room keeps the lights, water and air on schedule until it reconnects.`
-            : `The link to gateway ${farm.gateway} dropped ${farm.lastSync}. The controller in this room is keeping the lights, water and air on schedule, and will sync when it reconnects.`}
+          {farm.kind === 'outdoor'
+            ? `${farm.power}. Linked through LoRa gateway ${farm.gateway}; if the signal drops, the gateway keeps the readings and uploads them later.`
+            : farm.status === 'online'
+              ? `Linked through LoRa gateway ${farm.gateway}. If the signal drops, the controller in this room keeps the lights, water and air on schedule until it reconnects.`
+              : `The link to gateway ${farm.gateway} dropped ${farm.lastSync}. The controller in this room is keeping the lights, water and air on schedule, and will sync when it reconnects.`}
         </Txt>
 
         <View style={styles.harvestRow}>
@@ -102,7 +140,7 @@ export default function FarmDetailScreen() {
 
         <SectionHeader title="Equipment" />
         <View>
-          {DEVICES.map((d, i) => {
+          {devices.map((d, i) => {
             const on = auto[d.id];
             return (
               <View key={d.id}>
@@ -176,6 +214,17 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 0, paddingBottom: 0, gap: 0, flexGrow: 1 },
   topRow: { paddingHorizontal: 24, flexDirection: 'row' },
   renderWrap: { paddingHorizontal: 40, paddingTop: 12 },
+  snap: { borderRadius: Radius.xl, overflow: 'hidden', boxShadow: Shadow.card },
+  snapChip: {
+    position: 'absolute',
+    left: 10,
+    bottom: 10,
+    paddingHorizontal: 10,
+    height: 24,
+    borderRadius: Radius.pill,
+    backgroundColor: 'rgba(30, 26, 22, 0.72)',
+    justifyContent: 'center',
+  },
   sheet: {
     flexGrow: 1,
     marginTop: 20,

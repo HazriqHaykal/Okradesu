@@ -11,7 +11,7 @@ import {
   Sprout,
 } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Screen } from '@/components/screen';
 import { Badge } from '@/components/ui/badge';
@@ -22,6 +22,7 @@ import { Card, IconWell } from '@/components/ui/surface';
 import { Txt } from '@/components/ui/text';
 import { Colors, Radius, Shadow } from '@/constants/theme';
 import { FARMS, FARMS_ONLINE, LAST_SCAN, TOTAL_PODS_TODAY, type Farm } from '@/data/farms';
+import { HARVEST_TOTALS } from '@/data/harvest';
 
 export default function HomeScreen() {
   const [query, setQuery] = useState('');
@@ -83,7 +84,8 @@ export default function HomeScreen() {
           <Badge label={`${FARMS.length} farms`} tone="neutral" />
         </View>
         <Txt variant="body" weight={500}>
-          Best picked before 11:00, while pods are under 10 cm. 12 more turn ready tomorrow.
+          {HARVEST_TOTALS.must} must be picked today before they turn tough. Best picked early, while
+          it&apos;s cool.
         </Txt>
         <Button
           label="Open harvest map"
@@ -110,11 +112,15 @@ export default function HomeScreen() {
 
       <View style={styles.section}>
         <SectionHeader title="Browse by Farm" />
-        <View style={styles.tiles}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.tileScroll}
+          contentContainerStyle={styles.tiles}>
           {FARMS.map((f) => (
             <FarmTile key={f.id} farm={f} />
           ))}
-        </View>
+        </ScrollView>
       </View>
 
       <View style={styles.section}>
@@ -233,7 +239,8 @@ const styles = StyleSheet.create({
     boxShadow: Shadow.tile,
   },
   section: { marginTop: 24, gap: 12 },
-  tiles: { flexDirection: 'row', justifyContent: 'space-between' },
+  tileScroll: { marginHorizontal: -24 },
+  tiles: { gap: 4, paddingHorizontal: 20 },
   tile: { alignItems: 'center', gap: 6, width: 72 },
   tileBox: {
     width: 54,
