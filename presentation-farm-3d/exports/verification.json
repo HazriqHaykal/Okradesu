@@ -1,0 +1,36 @@
+{
+  "passed": true,
+  "browser": "Chrome",
+  "checked": [
+    "7 chapters",
+    "scenario rules",
+    "equipment inspector",
+    "labels",
+    "play/pause",
+    "recording view",
+    "GLB export",
+    "390px layout",
+    "file:// offline launch",
+    "1920x1080 recording view"
+  ],
+  "errors": [],
+  "diagnostics": {
+    "chapter": 0,
+    "elapsed": 0,
+    "playing": false,
+    "orbit": false,
+    "labels": true,
+    "clean": false,
+    "selected": null,
+    "time": 26.381300000000678,
+    "moisture": 42,
+    "pump": false,
+    "scan": false,
+    "internet": true,
+    "buffered": 0,
+    "dry": false,
+    "progress": 0,
+    "drawCalls": 263,
+    "triangles": 24896
+  }
+}
