@@ -42,14 +42,3 @@ example
 /ios
 /android
 
-
-# AI backend (ai/): environments, datasets and training runs stay local.
-# ai/models/best.pt is the active model and IS committed.
-ai/.venv/
-ai/.venv-gpu/
-ai/.venv-gpu-empty/
-ai/**/__pycache__/
-ai/**/*.pyc
-ai/dataset/
-ai/dataset_clean/
-ai/runs/

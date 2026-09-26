@@ -5,6 +5,7 @@ import { StyleSheet, View } from 'react-native';
 import { Txt } from '@/components/ui/text';
 import { Colors } from '@/constants/theme';
 
+/** Section title in Manrope 800 with an optional small orange action link on the right (e.g. "See All"). */
 export function SectionHeader({ title, action, href }: { title: string; action?: string; href?: Href }) {
   return (
     <View style={styles.row}>

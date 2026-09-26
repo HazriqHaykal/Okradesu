@@ -14,7 +14,10 @@ export type ChartDay = ForecastDay & {
 
 const fmtKg = (kg: number) => (Number.isInteger(kg) ? `${kg}` : kg.toFixed(1));
 
-/** Stacked daily bars: sold ahead (green) under not-yet-matched (orange 300). */
+/**
+ * Stacked daily bars: sold ahead (green) under not-yet-matched (orange 300).
+ * @category Harvest
+ */
 export function ForecastChart({
   height = 140,
   barWidth = 28,
@@ -89,6 +92,10 @@ export function ForecastChart({
   );
 }
 
+/**
+ * Small coloured square plus a label, for chart and map legends.
+ * @category Harvest
+ */
 export function LegendSwatch({
   color,
   label,

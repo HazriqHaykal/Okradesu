@@ -111,6 +111,7 @@ export type IconButtonProps = {
   dot?: boolean;
 };
 
+/** Round icon-only button (44 px by default). `surface` is white; `accent` is orange for the one primary action. Always pass `label` for screen readers. */
 export function IconButton({
   icon: Icon,
   label,

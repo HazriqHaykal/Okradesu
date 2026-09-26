@@ -14,6 +14,7 @@ const TONES: Record<BadgeTone, { bg: string; fg: string }> = {
   danger: { bg: Colors.dangerBg, fg: Colors.dangerFg },
 };
 
+/** Small uppercase status pill. Tones: accent (orange), neutral, success (green), solid (orange fill), danger (red). */
 export function Badge({
   label,
   tone = 'accent',

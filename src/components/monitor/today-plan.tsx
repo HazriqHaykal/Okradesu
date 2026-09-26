@@ -95,6 +95,7 @@ export function buildPlan(farms: MonitorFarm[], alerts: FarmAlert[], weather: We
   return tasks;
 }
 
+/** Today's to-do card: a progress bar plus tickable tasks, each with an icon and a tap target that opens its farm. */
 export function TodayPlan({
   tasks,
   onOpen,
