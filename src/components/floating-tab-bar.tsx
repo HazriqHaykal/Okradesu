@@ -4,14 +4,19 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Txt } from '@/components/ui/text';
-import { Colors, Palette, Radius, Shadow } from '@/constants/theme';
+import { Colors, MaxContentWidth, Shadow } from '@/constants/theme';
 
-/** The system's BottomNav: a white pill that floats over content. */
+/** Height of the bar itself, above the phone's home-indicator inset. */
+const BAR_HEIGHT = 64;
+/** The centre action is a circle that rises above the bar. */
+const CENTER_SIZE = 58;
+
+/** Bottom navigation docked to the screen edge: icon over label for every tab. */
 export function FloatingTabBar({ children }: TabListProps) {
   const insets = useSafeAreaInsets();
   return (
-    <View pointerEvents="box-none" style={[styles.wrap, { bottom: Math.max(insets.bottom, 12) + 10 }]}>
-      <View accessibilityRole="tablist" style={styles.bar}>
+    <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, 8) }]}>
+      <View accessibilityRole="tablist" style={styles.row}>
         {children}
       </View>
     </View>
@@ -21,66 +26,104 @@ export function FloatingTabBar({ children }: TabListProps) {
 type TabButtonProps = TabTriggerSlotProps & {
   icon: LucideIcon;
   label: string;
-  /** Tinted even when not selected (the AI Advisor in the middle). */
+  /** The raised round button in the middle (the AI Advisor). */
   highlight?: boolean;
 };
 
-/** Active tab fills orange and shows its label; the rest are icon-only. */
+/** A tab: icon over a short label; the selected one is ink and bold, the rest grey. */
 export function TabButton({ icon: Icon, label, highlight, isFocused, ...props }: TabButtonProps) {
+  if (highlight) {
+    return (
+      <Pressable
+        {...props}
+        accessibilityRole="tab"
+        accessibilityLabel={label}
+        accessibilityState={{ selected: isFocused }}
+        style={styles.tab}>
+        {({ pressed }) => (
+          <>
+            <View
+              style={[
+                styles.center,
+                { backgroundColor: pressed ? Colors.accentPressed : Colors.accent },
+                pressed && styles.centerPressed,
+              ]}>
+              <Icon size={26} color={Colors.textOnAccent} strokeWidth={2.25} />
+            </View>
+            <Txt
+              variant="caption"
+              weight={isFocused ? 800 : 600}
+              color={isFocused ? Colors.textPrimary : Colors.textSecondary}
+              numberOfLines={1}>
+              {label}
+            </Txt>
+          </>
+        )}
+      </Pressable>
+    );
+  }
+
   return (
     <Pressable
       {...props}
       accessibilityRole="tab"
       accessibilityLabel={label}
       accessibilityState={{ selected: isFocused }}
-      style={({ pressed }) => [
-        styles.tab,
-        highlight && !isFocused && styles.tabHighlight,
-        isFocused && styles.tabActive,
-        pressed && !isFocused && styles.tabPressed,
-      ]}>
+      style={({ pressed }) => [styles.tab, pressed && styles.tabPressed]}>
       <Icon
-        size={18}
-        color={isFocused ? Colors.textOnAccent : highlight ? Colors.textAccent : Colors.textSecondary}
-        strokeWidth={2}
+        size={22}
+        color={isFocused ? Colors.textPrimary : Colors.textSecondary}
+        strokeWidth={isFocused ? 2.5 : 2}
       />
-      {isFocused ? (
-        <Txt variant="small" weight={700} color={Colors.textOnAccent}>
-          {label}
-        </Txt>
-      ) : null}
+      <Txt
+        variant="caption"
+        weight={isFocused ? 800 : 600}
+        color={isFocused ? Colors.textPrimary : Colors.textSecondary}
+        numberOfLines={1}>
+        {label}
+      </Txt>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: {
+  bar: {
     position: 'absolute',
     left: 0,
     right: 0,
-    alignItems: 'center',
-    paddingHorizontal: 24,
-  },
-  bar: {
-    width: '100%',
-    maxWidth: 480,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 7,
+    bottom: 0,
     backgroundColor: Colors.surfaceCard,
-    borderRadius: Radius.xl,
-    boxShadow: Shadow.float,
+    borderTopWidth: 1,
+    borderTopColor: Colors.borderSubtle,
+    boxShadow: '0px -4px 16px rgba(30, 26, 22, 0.06)',
+  },
+  row: {
+    height: BAR_HEIGHT,
+    width: '100%',
+    maxWidth: MaxContentWidth,
+    alignSelf: 'center',
+    flexDirection: 'row',
   },
   tab: {
-    flexDirection: 'row',
+    flex: 1,
     alignItems: 'center',
-    gap: 6,
-    height: 44,
-    paddingHorizontal: 12,
-    borderRadius: Radius.lg,
+    justifyContent: 'flex-end',
+    gap: 4,
+    paddingBottom: 8,
   },
-  tabActive: { backgroundColor: Colors.accent, paddingHorizontal: 16 },
-  tabHighlight: { backgroundColor: Palette.orange200 },
-  tabPressed: { backgroundColor: Colors.surfaceSunken },
+  tabPressed: { opacity: 0.6 },
+  center: {
+    width: CENTER_SIZE,
+    height: CENTER_SIZE,
+    borderRadius: CENTER_SIZE / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    // Rises above the bar's top edge, like a floating action button.
+    marginTop: -(CENTER_SIZE / 2),
+    marginBottom: 2,
+    borderWidth: 4,
+    borderColor: Colors.surfaceCard,
+    boxShadow: Shadow.glow,
+  },
+  centerPressed: { transform: [{ scale: 0.95 }] },
 });

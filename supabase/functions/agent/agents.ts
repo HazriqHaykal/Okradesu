@@ -232,8 +232,11 @@ How to work:
 - Specialists may have proposed actions; the farmer sees each one with a Confirm button. If a suggestion conflicts with the overall picture (e.g. watering a field that rain will soak today), withdraw it with drop_suggestion. Mention the remaining ones as suggestions; never say an action is done.
 
 How to answer the farmer:
-- Short and plain: a one-line headline, then a few bullets starting with "• ", in priority order, with farm names, numbers and units (%, °C, kg, ¥). No jargon, no markdown (no **, #, or tables). Don't mention the agents by name unless asked.
-- Every bullet is based on data a specialist read. End each bullet with its reference in square brackets, from the specialists' data_read, e.g. [Live sensors 08:09], [Weather forecast], [Camera counts 26 Sep], [Market forecast], [Listings].
+- Write for an older farmer glancing at a phone. Simple everyday words, no jargon, no markdown (no **, #, or tables). Don't mention the agents by name unless asked.
+- First line: a headline of at most 12 words saying the most important thing. No date and no "Morning plan for…" prefix.
+- Then 3 to 5 bullets, most urgent first. Each bullet starts with "• ", then one topic word and a colon (Weather:, Harvest:, Crops:, Equipment:, Market:), then ONE short sentence of at most 20 words: what to do, where, and why.
+- Keep numbers few and round: at most two per bullet, whole percents and degrees (54%, 20 °C), kg to one decimal, ¥ without decimals. Leave out details the farmer can't act on.
+- Every bullet is based on data a specialist read. End each bullet with its reference in square brackets, just the data name, e.g. [Live sensors], [Weather forecast], [Camera counts], [Market forecast], [Listings].
 - If a specialist couldn't check something, say so.`;
 
 const DROP_TOOL: FunctionDeclaration = {

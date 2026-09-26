@@ -28,7 +28,7 @@ const MAX_HISTORY = 60;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const BRIEFING_PROMPT = (today: string) =>
-  `Morning briefing for ${today} (Japan). Ask every specialist, then write the farmer's plan for today in priority order: what needs attention first, what to pick, what to water or ventilate, and what okra to sell before it spoils.`;
+  `Morning briefing for ${today} (Japan). Ask every specialist, then write the farmer's plan for today in priority order: what needs attention first, what to pick, what to water or ventilate, and what okra to sell before it spoils. Keep it to a headline and at most 5 short bullets; the details stay in the specialists' reports.`;
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',

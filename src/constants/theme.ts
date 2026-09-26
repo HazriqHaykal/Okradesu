@@ -104,6 +104,6 @@ export const Shadow = {
   glow: '0px 4px 14px rgba(242, 154, 30, 0.22)',
 } as const;
 
-/** Space the floating tab bar takes at the bottom of a tab screen. */
-export const TabBarSpace = 110;
+/** Space the docked tab bar (64 px plus breathing room) takes at the bottom of a tab screen. */
+export const TabBarSpace = 84;
 export const MaxContentWidth = 560;

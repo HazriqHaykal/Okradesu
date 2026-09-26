@@ -9,6 +9,7 @@ import { Button, IconButton } from '@/components/ui/button';
 import { Chip, ChipRow } from '@/components/ui/chip';
 import { SearchField } from '@/components/ui/search-field';
 import { Card } from '@/components/ui/surface';
+import { AdvisorText } from '@/components/advisor/advisor-text';
 import { Txt } from '@/components/ui/text';
 import { Colors, Radius } from '@/constants/theme';
 import { askAgent, newRunId, type AgentHistory, type Proposal, type Trace } from '@/services/agent';
@@ -20,7 +21,14 @@ const SUGGESTIONS = [
   'Should I water the outdoor fields?',
 ];
 
-type Turn = { question: string; runId: string; reply?: string; proposals?: Proposal[]; trace?: Trace; error?: string };
+type Turn = {
+  question: string;
+  runId: string;
+  reply?: string;
+  proposals?: Proposal[];
+  trace?: Trace;
+  error?: string;
+};
 
 /** Chat with the advisor team: the orchestrator asks the specialists and suggests actions to confirm. */
 export function AgentChat() {
@@ -65,9 +73,7 @@ export function AgentChat() {
           </View>
           {t.reply !== undefined ? (
             <Card style={styles.bubbleAi}>
-              <Txt variant="body" color={Colors.textBody}>
-                {t.reply || 'Done.'}
-              </Txt>
+              <AdvisorText text={t.reply || 'Done.'} />
               <SourceChips sources={(t.trace ?? []).flatMap((x) => x.sources ?? [])} />
             </Card>
           ) : t.error ? (
