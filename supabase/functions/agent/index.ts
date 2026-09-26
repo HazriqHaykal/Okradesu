@@ -43,10 +43,24 @@ const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SE
   auth: { persistSession: false },
 });
 
-async function context(): Promise<ToolContext> {
+/** Embeds a search query the same way scripts/ingest-knowledge.mjs embeds the guides. */
+function embedder(ai: GoogleGenAI) {
+  return async (query: string) => {
+    const res = await ai.models.embedContent({
+      model: 'gemini-embedding-2',
+      contents: `task: search result | query: ${query}`,
+      config: { outputDimensionality: 768 },
+    });
+    const values = res.embeddings?.[0]?.values;
+    if (!values) throw new Error('Embedding failed.');
+    return values;
+  };
+}
+
+async function context(ai: GoogleGenAI): Promise<ToolContext> {
   const { data: farms, error } = await db.from('farms').select('*');
   if (error) throw new Error(`Could not load farms: ${error.message}`);
-  return { db, farms: farms as Farm[], today: jstDay(), proposals: [] as Proposal[] };
+  return { db, farms: farms as Farm[], today: jstDay(), proposals: [] as Proposal[], embed: embedder(ai) };
 }
 
 /** Writes progress for the app to show live; never fails the run. */
@@ -74,7 +88,7 @@ Deno.serve(async (req) => {
 
   try {
     if (body.mode === 'briefing') {
-      const ctx = await context();
+      const ctx = await context(ai);
       const { reply, trace } = await orchestrate(
         ai,
         [{ role: 'user', parts: [{ text: BRIEFING_PROMPT(ctx.today) }] }],
@@ -97,7 +111,7 @@ Deno.serve(async (req) => {
     if (history.length > MAX_HISTORY || history.some((c) => c?.role !== 'user' && c?.role !== 'model')) {
       return json({ error: 'Start a new conversation.' }, 400);
     }
-    const ctx = await context();
+    const ctx = await context(ai);
     const { reply, contents, trace } = await orchestrate(
       ai,
       [...history, { role: 'user', parts: [{ text: question }] }],

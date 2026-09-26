@@ -15,7 +15,7 @@ import {
   type GenerateContentConfig,
 } from 'npm:@google/genai@^2.24';
 
-import { TOOLS, runTool, sourceOf, type Source, type ToolContext } from './tools.ts';
+import { TOOLS, runTool, sourcesOf, type Source, type ToolContext } from './tools.ts';
 
 /**
  * Models to try in order. Free-tier quota is per model, so when one is used
@@ -117,6 +117,7 @@ async function runLoop(opts: {
 const FARM_CONTEXT = `Connected Okra Farm is a community okra co-op in Hinode, Japan: outdoor fields (Field A by the river, Field B on a slope; summer supply, solar sensor nodes, pump only) and indoor fields in empty buildings (Field C, Field D, Field E, Field F; off-season supply, with LEDs, pump and fans). Always call a farm by its field name (Field A to Field F), never by its building. A LoRa gateway links every farm; a camera with edge AI counts flowers and pods per row. Times and dates are Japan time.`;
 
 const SPECIALIST_RULES = `You are one specialist in a team led by an orchestrator agent. Do only the task you are given, within your area.
+- Before advising what to do or explaining why (disease, watering, harvest timing, storage, selling, equipment), look it up with search_knowledge and base the advice on the guide, naming it (e.g. "per the guide Downy mildew on okra"). For pesticide or fungicide choices, only say to ask JA.
 - Use your tools for real data; never invent a number. If a tool fails, say what you couldn't check.
 - You cannot act. If an action is clearly worth doing now, call a propose_* tool (at most two); the farmer confirms it later. Never say an action is done.
 - A farm whose LoRa link is offline runs on its own controller; commands to it wait at the gateway.
@@ -128,27 +129,28 @@ export const SPECIALISTS: Record<Exclude<AgentId, 'orchestrator'>, Specialist> =
   monitor: {
     label: 'Monitor & Control agent',
     area: 'Live sensor readings, out-of-range alerts, LoRa network status, weather and irrigation. Decides whether fields need watering and flags landslide risk at Field B and flood risk at Field A. Never propose watering an outdoor field when rain is forecast for today or tomorrow: the rain will water it.',
-    tools: ['get_farms_overview', 'get_sensor_history', 'get_weather', 'propose_device_command'],
+    tools: ['get_farms_overview', 'get_sensor_history', 'get_weather', 'search_knowledge', 'propose_device_command'],
   },
   health: {
     label: 'Crop Health agent',
     area: 'Disease risk for the crop: mildew and other fungal risk from humidity staying above 75% for hours, temperature and weak airflow, especially in indoor rooms. Suggests ventilation (fans) and LED changes.',
-    tools: ['get_farms_overview', 'get_sensor_history', 'get_weather', 'propose_device_command'],
+    tools: ['get_farms_overview', 'get_sensor_history', 'get_weather', 'search_knowledge', 'propose_device_command'],
   },
   harvest: {
     label: 'Harvest agent',
     area: "Today's picking plan from the camera: pods that must be picked today before they become overgrown, pods ready, which rows first, estimated kg, and overgrown pods for processors.",
-    tools: ['get_harvest_plan', 'get_weather'],
+    tools: ['get_harvest_plan', 'get_weather', 'search_knowledge'],
   },
   market: {
     label: 'Market agent',
     area: '7-day yield forecast, kg already reserved by buyers, surplus alerts (amber over 10% unsold, red over 25%), listings, pending buyer reservations, and selling overgrown pods to processors, so okra sells before it spoils. When a red surplus alert still has kg not yet listed, propose a surplus listing for the biggest one.',
-    tools: ['get_market_outlook', 'get_listings', 'propose_listing', 'propose_confirm_reservation'],
+    tools: ['get_market_outlook', 'get_listings', 'search_knowledge', 'propose_listing', 'propose_confirm_reservation'],
   },
 };
 
 /** Short, farmer-readable description of each tool call, for the live progress feed. */
 const TOOL_STEP: Record<string, string> = {
+  search_knowledge: 'looking it up in the okra guides',
   get_farms_overview: 'reading every farm’s sensors',
   get_sensor_history: 'checking the last hours of readings',
   get_weather: 'checking the weather',
@@ -184,8 +186,7 @@ async function runSpecialist(
       if (!spec.tools.includes(name)) return { error: `${name} is not one of your tools.` };
       if (TOOL_STEP[name]) await step(id, TOOL_STEP[name]);
       const outcome = await runTool(ctx, name, call.args ?? {});
-      const source = sourceOf(ctx, name, call.args ?? {}, outcome);
-      if (source) sources.push(source);
+      sources.push(...sourcesOf(ctx, name, call.args ?? {}, outcome));
       const made = outcome.ok ? (outcome.result as { status?: string; title?: string }) : null;
       if (made?.status === 'proposed' && made.title) await step(id, `suggested: ${made.title}`);
       return outcome.ok ? { output: outcome.result } : { error: outcome.error };
@@ -236,7 +237,7 @@ How to answer the farmer:
 - First line: a headline of at most 12 words saying the most important thing. No date and no "Morning plan for…" prefix.
 - Then 3 to 5 bullets, most urgent first. Each bullet starts with "• ", then one topic word and a colon (Weather:, Harvest:, Crops:, Equipment:, Market:), then ONE short sentence of at most 20 words: what to do, where, and why.
 - Keep numbers few and round: at most two per bullet, whole percents and degrees (54%, 20 °C), kg to one decimal, ¥ without decimals. Leave out details the farmer can't act on.
-- Every bullet is based on data a specialist read. End each bullet with its reference in square brackets, just the data name, e.g. [Live sensors], [Weather forecast], [Camera counts], [Market forecast], [Listings].
+- Every bullet is based on data a specialist read. End each bullet with its reference in square brackets, just the data name, e.g. [Live sensors], [Weather forecast], [Camera counts], [Market forecast], [Listings]. When the advice comes from a guide, add it too, e.g. [Live sensors] [Guide: SOP: high humidity in an indoor room].
 - If a specialist couldn't check something, say so.`;
 
 const DROP_TOOL: FunctionDeclaration = {

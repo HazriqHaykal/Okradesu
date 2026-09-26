@@ -48,6 +48,8 @@ export type ToolContext = {
   /** Japan calendar day, YYYY-MM-DD. */
   today: string;
   proposals: Proposal[];
+  /** Embeds a search query for the knowledge base (gemini-embedding-2, 768 dims). */
+  embed: (query: string) => Promise<number[]>;
 };
 
 // ── Time ───────────────────────────────────────────────────────────
@@ -141,6 +143,24 @@ export const TOOLS: ToolDef[] = [
     description:
       'Market Intelligence: listings from today on with their reservations, including pending reservations waiting for the farmer to confirm (with reservation ids and buyer names).',
     parameters: { type: 'object', properties: {}, required: [], additionalProperties: false },
+  },
+  {
+    name: 'search_knowledge',
+    description:
+      "Okra knowledge base (RAG): search the co-op's guides on okra diseases (downy mildew, powdery mildew, Cercospora leaf spot, leaf curl virus), growing targets, harvest timing and grades, storage and shelf life, pests, farm SOPs (node offline, heavy rain, indoor humidity) and selling rules. Use it before advising what to do or explaining why, and cite the guide.",
+    parameters: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'What to look up, in plain words, e.g. "humidity above 75% overnight indoor room what to do".' },
+        topic: {
+          type: 'string',
+          enum: ['any', 'disease', 'growing', 'harvest', 'storage', 'pests', 'sop', 'market'],
+          description: 'Limit to one topic, or "any".',
+        },
+      },
+      required: ['query', 'topic'],
+      additionalProperties: false,
+    },
   },
   {
     name: 'propose_device_command',
@@ -399,6 +419,34 @@ async function listingsWithReservations(ctx: ToolContext) {
     }));
 }
 
+// ── Knowledge base (RAG) ───────────────────────────────────────────
+/** Passages below this similarity are too loosely related to cite. */
+const MIN_SIMILARITY = 0.55;
+
+async function searchKnowledge(ctx: ToolContext, input: { query: string; topic: string }) {
+  const query = String(input.query ?? '').trim();
+  if (!query) throw new ToolError('Say what to look up.');
+  const embedding = await ctx.embed(query);
+  const rows = check(
+    await ctx.db.rpc('match_knowledge', {
+      query_embedding: embedding,
+      match_count: 4,
+      only_topic: input.topic && input.topic !== 'any' ? input.topic : null,
+    }),
+  ) as { title: string; section: string; content: string; similarity: number }[];
+  const hits = rows.filter((r) => r.similarity >= MIN_SIMILARITY);
+  if (!hits.length) return { passages: [], note: 'Nothing relevant in the guides; answer from the data only.' };
+  return {
+    passages: hits.map((r) => ({
+      guide: r.title,
+      section: r.section,
+      text: r.content,
+      cite_as: `[Guide: ${r.title}]`,
+    })),
+    note: 'Draft guides written for the demo; for pesticide or fungicide choices, refer the farmer to JA.',
+  };
+}
+
 // ── Proposals (farmer confirms in the app) ─────────────────────────
 function propose(ctx: ToolContext, p: Omit<Proposal, 'id'>) {
   // Two agents may reach the same conclusion; the farmer sees it once.
@@ -482,6 +530,7 @@ export async function runTool(ctx: ToolContext, name: string, input: any): Promi
         case 'get_harvest_plan': return harvestPlan(ctx, input);
         case 'get_market_outlook': return marketOutlook(ctx, input);
         case 'get_listings': return listingsWithReservations(ctx);
+        case 'search_knowledge': return searchKnowledge(ctx, input);
         case 'propose_device_command': return proposeDevice(ctx, input);
         case 'propose_listing': return proposeListing(ctx, input);
         case 'propose_confirm_reservation': return proposeConfirm(ctx, input);
@@ -501,7 +550,18 @@ export type Source = { tool: string; label: string; detail: string };
 const jstClock = (d = new Date()) => new Date(d.getTime() + JST_MS).toISOString().slice(11, 16);
 
 // deno-lint-ignore no-explicit-any
-export function sourceOf(ctx: ToolContext, name: string, input: any, outcome: ToolOutcome): Source | null {
+export function sourcesOf(ctx: ToolContext, name: string, input: any, outcome: ToolOutcome): Source[] {
+  if (!outcome.ok) return [];
+  if (name === 'search_knowledge') {
+    const passages = (outcome.result as { passages: { guide: string; section: string }[] }).passages;
+    return passages.map((p) => ({ tool: name, label: 'Guide', detail: `${p.guide} › ${p.section}` }));
+  }
+  const one = sourceOf(ctx, name, input, outcome);
+  return one ? [one] : [];
+}
+
+// deno-lint-ignore no-explicit-any
+function sourceOf(ctx: ToolContext, name: string, input: any, outcome: ToolOutcome): Source | null {
   if (!outcome.ok) return null;
   // deno-lint-ignore no-explicit-any
   const r = outcome.result as any;
