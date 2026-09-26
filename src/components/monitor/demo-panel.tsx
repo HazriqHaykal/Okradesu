@@ -31,7 +31,7 @@ const SCENARIOS: { key: Flag; icon: LucideIcon; title: string; detail: string }[
   {
     key: 'humid',
     icon: Wind,
-    title: 'Humid air at Gymnasium',
+    title: 'Humid air at Field D',
     detail: 'Humidity 88%: fans switch on, fungal risk warning',
   },
   {

@@ -36,6 +36,14 @@
         }
       ],
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Okradesu to open your photos so you can check okra pods and leaves from pictures you already took.",
+          "cameraPermission": "Allow Okradesu to use the camera to photograph okra pods and leaves.",
+          "microphonePermission": false
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "backgroundColor": "#FFF7EC",

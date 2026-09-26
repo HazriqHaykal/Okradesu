@@ -8,7 +8,7 @@ import { IconButton } from '@/components/ui/button';
 import { ScreenTitle } from '@/components/ui/section-header';
 import { marketActions, useMarket } from '@/state/market-store';
 
-/** Market Intelligence: the week's forecast, surplus alerts and listings, so okra sells before it spoils. */
+/** Market Intelligence: the week's forecast and surplus alerts, so okra sells before it spoils. */
 export default function MarketScreen() {
   const { status, error, source } = useMarket((s) => s);
   const [scope, setScope] = useState<Scope>('all');

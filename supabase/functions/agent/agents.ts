@@ -114,7 +114,7 @@ async function runLoop(opts: {
 }
 
 // ── Specialists ────────────────────────────────────────────────────
-const FARM_CONTEXT = `Connected Okra Farm is a community okra co-op in Hinode, Japan: outdoor fields (Field A by the river, Hillside on a slope; summer supply, solar sensor nodes, pump only) and indoor rooms in empty buildings (Classroom 2, Gymnasium, House 4, Post Office; off-season supply, with LEDs, pump and fans). A LoRa gateway links every farm; a camera with edge AI counts flowers and pods per row. Times and dates are Japan time.`;
+const FARM_CONTEXT = `Connected Okra Farm is a community okra co-op in Hinode, Japan: outdoor fields (Field A by the river, Field B on a slope; summer supply, solar sensor nodes, pump only) and indoor fields in empty buildings (Field C, Field D, Field E, Field F; off-season supply, with LEDs, pump and fans). Always call a farm by its field name (Field A to Field F), never by its building. A LoRa gateway links every farm; a camera with edge AI counts flowers and pods per row. Times and dates are Japan time.`;
 
 const SPECIALIST_RULES = `You are one specialist in a team led by an orchestrator agent. Do only the task you are given, within your area.
 - Use your tools for real data; never invent a number. If a tool fails, say what you couldn't check.
@@ -127,7 +127,7 @@ type Specialist = { label: string; area: string; tools: string[] };
 export const SPECIALISTS: Record<Exclude<AgentId, 'orchestrator'>, Specialist> = {
   monitor: {
     label: 'Monitor & Control agent',
-    area: 'Live sensor readings, out-of-range alerts, LoRa network status, weather and irrigation. Decides whether fields need watering and flags landslide risk at Hillside and flood risk at Field A. Never propose watering an outdoor field when rain is forecast for today or tomorrow: the rain will water it.',
+    area: 'Live sensor readings, out-of-range alerts, LoRa network status, weather and irrigation. Decides whether fields need watering and flags landslide risk at Field B and flood risk at Field A. Never propose watering an outdoor field when rain is forecast for today or tomorrow: the rain will water it.',
     tools: ['get_farms_overview', 'get_sensor_history', 'get_weather', 'propose_device_command'],
   },
   health: {

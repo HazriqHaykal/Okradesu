@@ -198,8 +198,8 @@ const OUTDOOR: MonitorFarm[] = [
     hazard: 'flood',
     name: 'Field A',
     type: 'outdoor',
-    building: 'Riverside plot',
-    place: 'Riverside · 120 plants',
+    building: 'Outdoor field',
+    place: 'Outdoor · 120 plants',
     plants: 120,
     day: 58,
     podsReady: 31,
@@ -216,10 +216,10 @@ const OUTDOOR: MonitorFarm[] = [
   },
   {
     id: 'hillside',
-    name: 'Hillside',
+    name: 'Field B',
     type: 'outdoor',
-    building: 'Terraced slope',
-    place: 'Kawabe slope · 80 plants',
+    building: 'Outdoor field',
+    place: 'Outdoor · 80 plants',
     plants: 80,
     day: 51,
     podsReady: 18,
@@ -471,14 +471,14 @@ export type SensorNode = {
 
 const CODE: Record<string, string> = {
   'field-a': 'FA',
-  hillside: 'HS',
-  'classroom-2': 'C2',
-  gymnasium: 'GY',
-  'house-4': 'H4',
-  'post-office': 'PO',
+  hillside: 'FB',
+  'classroom-2': 'FC',
+  gymnasium: 'FD',
+  'house-4': 'FE',
+  'post-office': 'FF',
 };
 
-/** Signal falls off with distance from the gateway; the hillside is the far edge. */
+/** Signal falls off with distance from the gateway; Field B (the hillside) is the far edge. */
 const RSSI: Record<string, number> = {
   'field-a': -94,
   hillside: -109,

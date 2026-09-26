@@ -1,7 +1,8 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Camera, Coins, RotateCcw, X } from 'lucide-react-native';
+import * as ImagePicker from 'expo-image-picker';
+import { Camera, ImageUp, Ruler, RotateCcw, X } from 'lucide-react-native';
 import { useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -22,7 +23,7 @@ import { harvestActions } from '@/state/harvest-store';
 type Phase = 'camera' | 'analyzing' | 'result';
 type Shot = { uri?: string; sample: boolean };
 
-/** Phone photo check: photograph a pod beside a ¥100 coin, get length and grade. */
+/** Phone photo check: photograph a pod, get length and grade. */
 export default function PodCheckScreen() {
   const params = useLocalSearchParams<{ farm?: string; row?: string }>();
   const farmId = params.farm || undefined;
@@ -65,6 +66,18 @@ export default function PodCheckScreen() {
   const takePhoto = async () => {
     const photo = await camera.current?.takePictureAsync({ base64: true, quality: 0.6 });
     if (photo) analyze({ uri: photo.uri, sample: false }, photo.base64);
+  };
+
+  /** Use a photo already on the phone instead of taking a new one. */
+  const pickPhoto = async () => {
+    const picked = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: 'images',
+      quality: 0.6,
+      base64: true,
+    });
+    if (picked.canceled) return;
+    const asset = picked.assets[0];
+    analyze({ uri: asset.uri, sample: false }, asset.base64 ?? undefined);
   };
 
   const reset = () => {
@@ -118,6 +131,13 @@ export default function PodCheckScreen() {
               {!cameraError && permission?.canAskAgain !== false ? (
                 <Button label="Allow camera" size="md" onPress={requestPermission} />
               ) : null}
+              <Button
+                label="Choose from photos"
+                variant="secondary"
+                size="md"
+                icon={ImageUp}
+                onPress={pickPhoto}
+              />
             </View>
           ) : null}
 
@@ -125,11 +145,6 @@ export default function PodCheckScreen() {
             shot.sample || !shot.uri ? (
               <View style={styles.sampleTray}>
                 <OkraPod width={220} />
-                <View style={styles.coin}>
-                  <Txt variant="caption" weight={800} color={Palette.ink700}>
-                    ¥100
-                  </Txt>
-                </View>
               </View>
             ) : (
               <Image source={{ uri: shot.uri }} style={StyleSheet.absoluteFill} contentFit="cover" />
@@ -139,11 +154,6 @@ export default function PodCheckScreen() {
           {phase === 'camera' && cameraReady ? (
             <View pointerEvents="none" style={StyleSheet.absoluteFill}>
               <View style={styles.guide} />
-              <View style={styles.coinGuide}>
-                <Txt variant="micro" color={Colors.surfaceCard}>
-                  ¥100
-                </Txt>
-              </View>
             </View>
           ) : null}
 
@@ -189,10 +199,9 @@ export default function PodCheckScreen() {
         {phase === 'camera' ? (
           <>
             <View style={styles.tip}>
-              <Coins size={18} color={Colors.textAccent} strokeWidth={2} />
+              <Ruler size={18} color={Colors.textAccent} strokeWidth={2} />
               <Txt variant="small" color={Colors.textBody} style={{ flex: 1 }}>
-                Lay the pod flat and put a ¥100 coin next to it. The coin gives the scale, so length is
-                accurate.
+                Lay the pod flat and fit the whole pod inside the dashed box.
               </Txt>
             </View>
             {error ? (
@@ -201,6 +210,12 @@ export default function PodCheckScreen() {
               </Txt>
             ) : null}
             <View style={styles.shutterRow}>
+              <View style={styles.shutterSide}>
+                <IconButton icon={ImageUp} label="Choose from photos" size={52} onPress={pickPhoto} />
+                <Txt variant="caption" weight={700} color={Colors.textSecondary}>
+                  Photos
+                </Txt>
+              </View>
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Take photo"
@@ -213,6 +228,8 @@ export default function PodCheckScreen() {
                 ]}>
                 <View style={styles.shutterInner} />
               </Pressable>
+              {/* Keeps the shutter centred. */}
+              <View style={styles.shutterSide} />
             </View>
             <Button
               label="Try with a sample pod"
@@ -242,12 +259,6 @@ export default function PodCheckScreen() {
             <View style={styles.facts}>
               <InfoStat label="Grade" value={result.grade} />
               <InfoStat label="Confidence" value={`${Math.round(result.confidence * 100)}%`} />
-              <InfoStat
-                label="Scale"
-                value={
-                  result.reference === 'none' ? 'None' : result.reference === 'coin' ? '¥100 coin' : 'Card'
-                }
-              />
             </View>
             {result.simulated ? (
               <Txt variant="caption" color={Colors.textSecondary}>
@@ -300,19 +311,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  coin: {
-    position: 'absolute',
-    right: '14%',
-    bottom: '16%',
-    width: 54,
-    height: 54,
-    borderRadius: 27,
-    backgroundColor: '#C9CCD1',
-    borderWidth: 3,
-    borderColor: '#AEB2B8',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   guide: {
     position: 'absolute',
     left: '14%',
@@ -323,19 +321,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderStyle: 'dashed',
     borderColor: 'rgba(255, 255, 255, 0.85)',
-  },
-  coinGuide: {
-    position: 'absolute',
-    right: '12%',
-    bottom: '12%',
-    width: 58,
-    height: 58,
-    borderRadius: 29,
-    borderWidth: 2,
-    borderStyle: 'dashed',
-    borderColor: 'rgba(255, 255, 255, 0.85)',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   box: { position: 'absolute', borderWidth: 3, borderRadius: 8 },
   boxTag: {
@@ -359,7 +344,8 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   tip: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
-  shutterRow: { alignItems: 'center' },
+  shutterRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 28 },
+  shutterSide: { width: 64, alignItems: 'center', gap: 4 },
   shutter: {
     width: 76,
     height: 76,

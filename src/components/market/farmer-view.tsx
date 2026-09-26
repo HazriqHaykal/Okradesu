@@ -9,28 +9,19 @@ import {
   Thermometer,
   Warehouse,
 } from 'lucide-react-native';
-import { Fragment, useState } from 'react';
+import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { ForecastChart } from '@/components/forecast-chart';
 import { OkraPod } from '@/components/illustrations';
-import {
-  GRADE_LABEL,
-  TYPE_LABEL,
-  cap,
-  chartDay,
-  dayLabel,
-  farmName,
-  kg,
-  yen,
-} from '@/components/market/format';
-import { Banner, EmptyNote, StatTile } from '@/components/market/states';
+import { chartDay, dayLabel, farmName, kg, yen } from '@/components/market/format';
+import { Banner, StatTile } from '@/components/market/states';
 import { SupplyCalendar } from '@/components/market/supply-calendar';
-import { Badge, type BadgeTone } from '@/components/ui/badge';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Chip, ChipRow } from '@/components/ui/chip';
 import { SectionHeader } from '@/components/ui/section-header';
-import { Card, Divider } from '@/components/ui/surface';
+import { Card } from '@/components/ui/surface';
 import { Txt } from '@/components/ui/text';
 import { AVG_POD_WEIGHT_G, MIN_SURPLUS_KG, PRICE_PER_KG, SURPLUS_DISCOUNT } from '@/constants/market';
 import { Colors, Palette, Radius } from '@/constants/theme';
@@ -47,13 +38,9 @@ import {
   type SurplusAlert,
 } from '@/lib/forecast';
 import { marketActions, useMarket } from '@/state/market-store';
-import type { Listing, ListingStatus } from '@/types/market';
 
-/** Alerts and listings shown before "See all", like Home's task list. */
+/** Alerts shown before "See all", like Home's task list. */
 const ALERT_LIMIT = 3;
-const LISTING_LIMIT = 3;
-
-const STATUS_TONE: Record<ListingStatus, BadgeTone> = { open: 'accent', reserved: 'success', sold: 'neutral' };
 
 export type Scope = 'all' | string;
 
@@ -245,14 +232,6 @@ export function FarmerView({ scope, onScope }: { scope: Scope; onScope: (s: Scop
         </Banner>
       ) : null}
 
-      <SectionHeader title="My Listings" />
-      <MyListings
-        listings={listings.filter((l) => farmIds.includes(l.farm_id))}
-        today={today}
-        busy={busy}
-        onConfirm={(id) => run(`confirm-${id}`, () => marketActions.setReservationStatus(id, 'confirmed'))}
-      />
-
       <SectionHeader title="Year-round Supply" />
       <SupplyCalendar month={new Date().getMonth() + 1} />
     </View>
@@ -329,91 +308,6 @@ function SurplusAlerts({
   );
 }
 
-// ── My listings ────────────────────────────────────────────────────
-function MyListings({
-  listings,
-  today,
-  busy,
-  onConfirm,
-}: {
-  listings: Listing[];
-  today: string;
-  busy: string | null;
-  onConfirm: (reservationId: string) => void;
-}) {
-  const { reservations, buyers } = useMarket((s) => s);
-  const [showAll, setShowAll] = useState(false);
-  if (!listings.length) {
-    return (
-      <EmptyNote art={<OkraPod width={56} />}>
-        No listings yet. List a surplus above and nearby buyers are offered it.
-      </EmptyNote>
-    );
-  }
-  // Newest first, so a listing made from an alert sits on top.
-  const sorted = [...listings].sort(
-    (a, b) => b.created_at.localeCompare(a.created_at) || a.harvest_date.localeCompare(b.harvest_date),
-  );
-  const shown = showAll ? sorted : sorted.slice(0, LISTING_LIMIT);
-  const buyerName = (id: string) => buyers.find((b) => b.id === id)?.name ?? 'Buyer';
-
-  return (
-    <View style={{ gap: 10 }}>
-      <Card style={styles.list}>
-        {shown.map((l, i) => {
-          const res = reservations.filter((r) => r.listing_id === l.id && r.status !== 'cancelled');
-          const resKg = res.reduce((n, r) => n + r.quantity_kg, 0);
-          const pending = res.filter((r) => r.status === 'pending');
-          return (
-            <Fragment key={l.id}>
-              {i > 0 ? <Divider /> : null}
-              <View style={styles.listing}>
-                <View style={styles.listingTop}>
-                  <View style={{ flex: 1, gap: 2 }}>
-                    <Txt variant="body" weight={800}>
-                      {dayLabel(l.harvest_date, today)} · {farmName(l.farm_id)}
-                    </Txt>
-                    <Txt variant="small" color={Colors.textSecondary} tabular>
-                      {kg(l.quantity_kg)} · {GRADE_LABEL[l.grade]} · {yen(l.price_per_kg)}/kg
-                    </Txt>
-                  </View>
-                  <View style={styles.badgesRight}>
-                    <Badge label={cap(l.status)} tone={STATUS_TONE[l.status]} />
-                    {l.listing_type !== 'regular' ? (
-                      <Badge label={TYPE_LABEL[l.listing_type]} tone={l.listing_type === 'surplus' ? 'solid' : 'accent'} />
-                    ) : null}
-                  </View>
-                </View>
-                <Txt variant="caption" color={Colors.textSecondary} tabular>
-                  {res.length
-                    ? `${res.length} ${res.length === 1 ? 'reservation' : 'reservations'} · ${kg(resKg)}`
-                    : 'No reservations yet'}
-                </Txt>
-                {pending.map((r) => (
-                  <View key={r.id} style={styles.pending}>
-                    <Txt variant="small" weight={700} style={{ flex: 1 }}>
-                      {buyerName(r.buyer_id)} wants {kg(r.quantity_kg)}
-                    </Txt>
-                    <Button
-                      label={busy === `confirm-${r.id}` ? 'Saving…' : 'Confirm'}
-                      size="sm"
-                      disabled={busy !== null}
-                      onPress={() => onConfirm(r.id)}
-                    />
-                  </View>
-                ))}
-              </View>
-            </Fragment>
-          );
-        })}
-      </Card>
-      {sorted.length > LISTING_LIMIT ? (
-        <ShowAll open={showAll} count={sorted.length} onToggle={() => setShowAll((s) => !s)} />
-      ) : null}
-    </View>
-  );
-}
-
 /** Same toggle as Home's task list. */
 function ShowAll({ open, count, onToggle }: { open: boolean; count: number; onToggle: () => void }) {
   return (
@@ -442,17 +336,5 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: Radius.md,
     backgroundColor: Palette.orange200,
-  },
-  list: { paddingHorizontal: 16, paddingVertical: 4 },
-  listing: { paddingVertical: 12, gap: 6 },
-  listingTop: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
-  badgesRight: { alignItems: 'flex-end', gap: 4 },
-  pending: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    padding: 10,
-    borderRadius: Radius.md,
-    backgroundColor: Colors.surfaceTint,
   },
 });

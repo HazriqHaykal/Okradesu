@@ -10,7 +10,7 @@
  *   node --env-file=.env.local scripts/mock-gateway.mjs --offline none
  *
  * Farms listed after --offline send nothing (a lost LoRa link); their
- * commands wait as queued. The default matches the app: House 4 is offline.
+ * commands wait as queued. The default matches the app: Field E (house-4) is offline.
  * Stop the script and every farm goes offline in the app after 5 minutes.
  */
 import { createClient } from '@supabase/supabase-js';

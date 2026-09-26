@@ -8,7 +8,7 @@ import { useSyncExternalStore } from 'react';
 export type DemoState = {
   /** Field A soil drops to 24%. */
   drySoil: boolean;
-  /** Gymnasium humidity jumps to 88%, so its fans switch on. */
+  /** Field D humidity jumps to 88%, so its fans switch on. */
   humid: boolean;
   /** 72 mm of rain tomorrow: landslide and flood alerts. */
   heavyRain: boolean;

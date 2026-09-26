@@ -29,12 +29,12 @@ create table farms (
 );
 
 insert into farms (id, name, type, place, plants, "rows", gateway, hazard, mean_temp_c, disease_risk) values
-  ('field-a',     'Field A',     'outdoor', 'Riverside',           120, 6, 'G-01', 'flood',     25.5, null),
-  ('hillside',    'Hillside',    'outdoor', 'Kawabe slope',         80, 5, 'G-01', 'landslide', 24.0, null),
-  ('classroom-2', 'Classroom 2', 'indoor',  'Hinode School',        48, 4, 'G-02', null,        27.4, null),
-  ('gymnasium',   'Gymnasium',   'indoor',  'Hinode School',        96, 6, 'G-02', null,        26.8, null),
-  ('house-4',     'House 4',     'indoor',  'Minami vacant house',  32, 3, 'G-01', null,        25.9, null),
-  ('post-office', 'Post Office', 'indoor',  'Kawabe closed branch', 40, 4, 'G-01', null,        26.1, 'Mildew risk');
+  ('field-a',     'Field A',     'outdoor', 'Outdoor field',       120, 6, 'G-01', 'flood',     25.5, null),
+  ('hillside',    'Field B',     'outdoor', 'Outdoor field',        80, 5, 'G-01', 'landslide', 24.0, null),
+  ('classroom-2', 'Field C',     'indoor',  'Indoor field',         48, 4, 'G-02', null,        27.4, null),
+  ('gymnasium',   'Field D',     'indoor',  'Indoor field',         96, 6, 'G-02', null,        26.8, null),
+  ('house-4',     'Field E',     'indoor',  'Indoor field',         32, 3, 'G-01', null,        25.9, null),
+  ('post-office', 'Field F',     'indoor',  'Indoor field',         40, 4, 'G-01', null,        26.1, 'Mildew risk');
 
 create table agent_briefings (
   id         bigint generated always as identity primary key,

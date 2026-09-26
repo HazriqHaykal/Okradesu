@@ -111,7 +111,7 @@ export const TOOLS: ToolDef[] = [
   {
     name: 'get_weather',
     description:
-      'Weather for the farm area (Hinode, Japan): current conditions and the next 3 days (rain mm, rain chance, temperatures). Heavy rain means outdoor pumps should skip watering, and warns of landslide (Hillside) or flood (Field A) risk.',
+      'Weather for the farm area (Hinode, Japan): current conditions and the next 3 days (rain mm, rain chance, temperatures). Heavy rain means outdoor pumps should skip watering, and warns of landslide (Field B) or flood (Field A) risk.',
     parameters: { type: 'object', properties: {}, required: [], additionalProperties: false },
   },
   {
