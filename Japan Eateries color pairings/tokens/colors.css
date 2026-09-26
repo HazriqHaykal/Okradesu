@@ -1,0 +1,45 @@
+:root {
+  /* Orange — the one brand accent */
+  --orange-50: #FFF7EC;
+  --orange-100: #FFF1DC;
+  --orange-150: #FFE9CC;
+  --orange-200: #FFE3BE;
+  --orange-300: #FFCB85;
+  --orange-400: #F8B04E;
+  --orange-500: #F29A1E;
+  --orange-600: #DB8410;
+  --orange-700: #A85E00;
+  --orange-800: #7A4400;
+
+  /* Ink — warm neutrals */
+  --ink-900: #1E1A16;
+  --ink-700: #4A443D;
+  --ink-500: #6F675D;
+  --ink-300: #B8AFA3;
+  --ink-200: #EADCC6;
+  --ink-100: #F4ECE0;
+  --white: #FFFFFF;
+
+  /* Status */
+  --green-500: #3E8E5A;
+  --red-500: #D2462C;
+
+  /* Semantic aliases */
+  --bg-app: var(--orange-50);
+  --gradient-hero: linear-gradient(180deg, var(--orange-200) 0%, var(--orange-50) 38%);
+  --surface-card: var(--white);
+  --surface-tint: var(--orange-150);
+  --surface-sunken: var(--ink-100);
+  --text-primary: var(--ink-900);
+  --text-secondary: var(--ink-500);
+  --text-accent: var(--orange-700);
+  --text-on-accent: var(--ink-900);
+  --accent: var(--orange-500);
+  --accent-hover: var(--orange-400);
+  --accent-pressed: var(--orange-600);
+  --border-subtle: var(--ink-200);
+  --border-strong: var(--ink-900);
+  --rating: var(--orange-500);
+  --success: var(--green-500);
+  --danger: var(--red-500);
+}

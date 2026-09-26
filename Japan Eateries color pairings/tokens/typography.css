@@ -1,0 +1,28 @@
+:root {
+  --font-display: "Anton", "Impact", "Arial Narrow", sans-serif;
+  --font-body: "Manrope", system-ui, -apple-system, sans-serif;
+
+  --text-display-xl: 44px;
+  --text-display: 38px;
+  --text-display-sm: 28px;
+  --text-title: 22px;
+  --text-heading: 17px;
+  --text-body-lg: 15px;
+  --text-body: 13px;
+  --text-small: 12px;
+  --text-caption: 11px;
+  --text-micro: 10px;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-extrabold: 800;
+
+  --leading-display: 1;
+  --leading-tight: 1.2;
+  --leading-body: 1.55;
+
+  --tracking-display: 0.02em;
+  --tracking-label: 0.08em;
+}
