@@ -44,6 +44,10 @@ function PodPaths({ tone }: { tone: PodTone }) {
   );
 }
 
+/**
+ * Flat okra pod illustration; `tone` is fresh, small or overgrown.
+ * @category Illustrations
+ */
 export function OkraPod({ width = 120, tone = 'fresh' }: { width?: number; tone?: PodTone }) {
   return (
     <Svg width={width} height={(width * 30) / 100} viewBox="0 0 100 30">
@@ -64,6 +68,10 @@ function FlowerPaths() {
   );
 }
 
+/**
+ * Flat okra flower illustration: pale yellow petals with a maroon centre.
+ * @category Illustrations
+ */
 export function OkraFlower({ size = 40 }: { size?: number }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 40 40">
@@ -104,6 +112,7 @@ function rng(seed: number) {
  * Illustrated camera frame of one row with the Edge AI's boxes on it:
  * red = must pick today, orange = ready, grey = too small, brown = overgrown,
  * green = new flower.
+ * @category Illustrations
  */
 export function RowSnapshot({
   det,

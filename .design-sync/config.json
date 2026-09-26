@@ -1,0 +1,84 @@
+{
+  "projectId": "8135a171-cc78-4172-a3ed-b3a27e556fe6",
+  "shape": "package",
+  "pkg": "@okradesu/ui",
+  "globalName": "Okradesu",
+  "entry": ".design-sync/pkg/dist/index.js",
+  "buildCmd": "node .design-sync/build-web.mjs",
+  "srcDir": "../../src",
+  "cssEntry": "tokens.css",
+  "extraFonts": [
+    "fonts.css"
+  ],
+  "componentSrcMap": {
+    "Colors": null,
+    "Fonts": null,
+    "MaxContentWidth": null,
+    "Palette": null,
+    "Radius": null,
+    "Shadow": null,
+    "Spacing": null,
+    "TextSize": null,
+    "Icons": null,
+    "FARMS": null,
+    "Txt": "../../src/components/ui/text.tsx",
+    "Button": "../../src/components/ui/button.tsx",
+    "IconButton": "../../src/components/ui/button.tsx",
+    "Badge": "../../src/components/ui/badge.tsx",
+    "Card": "../../src/components/ui/surface.tsx",
+    "Divider": "../../src/components/ui/surface.tsx",
+    "IconWell": "../../src/components/ui/surface.tsx",
+    "Meter": "../../src/components/ui/surface.tsx",
+    "SectionHeader": "../../src/components/ui/section-header.tsx",
+    "InfoStat": "../../src/components/ui/section-header.tsx",
+    "ScreenTitle": "../../src/components/ui/section-header.tsx",
+    "SearchField": "../../src/components/ui/search-field.tsx",
+    "Toggle": "../../src/components/ui/toggle.tsx",
+    "RenderPlaceholder": "../../src/components/ui/render-placeholder.tsx",
+    "HarvestGrid": "../../src/components/harvest-map.tsx",
+    "UpcomingChart": "../../src/components/harvest-map.tsx",
+    "ForecastChart": "../../src/components/forecast-chart.tsx",
+    "LegendSwatch": "../../src/components/forecast-chart.tsx",
+    "MaturityBadge": "../../src/components/maturity-badge.tsx",
+    "TodayPlan": "../../src/components/monitor/today-plan.tsx",
+    "RowSnapshot": "../../src/components/illustrations.tsx",
+    "OkraPod": "../../src/components/illustrations.tsx",
+    "OkraFlower": "../../src/components/illustrations.tsx"
+  },
+  "readmeHeader": ".design-sync/conventions.md",
+  "overrides": {
+    "Button": {
+      "cardMode": "column"
+    },
+    "Card": {
+      "cardMode": "column"
+    },
+    "InfoStat": {
+      "cardMode": "column"
+    },
+    "ScreenTitle": {
+      "cardMode": "column"
+    },
+    "SearchField": {
+      "cardMode": "column"
+    },
+    "Toggle": {
+      "cardMode": "column"
+    },
+    "ForecastChart": {
+      "cardMode": "column"
+    },
+    "HarvestGrid": {
+      "cardMode": "column"
+    },
+    "UpcomingChart": {
+      "cardMode": "column"
+    },
+    "RowSnapshot": {
+      "cardMode": "column"
+    },
+    "TodayPlan": {
+      "cardMode": "column"
+    }
+  }
+}
