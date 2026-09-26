@@ -95,7 +95,16 @@ export function buildPlan(farms: MonitorFarm[], alerts: FarmAlert[], weather: We
   return tasks;
 }
 
-export function TodayPlan({ tasks, onOpen }: { tasks: Task[]; onOpen: (farmId: string) => void }) {
+export function TodayPlan({
+  tasks,
+  onOpen,
+  limit,
+}: {
+  tasks: Task[];
+  onOpen: (farmId: string) => void;
+  /** Show only the first N tasks; progress still counts them all. */
+  limit?: number;
+}) {
   const [done, setDone] = useState<string[]>([]);
   const count = tasks.filter((t) => done.includes(t.id)).length;
   const toggle = (id: string) => setDone((d) => (d.includes(id) ? d.filter((x) => x !== id) : [...d, id]));
@@ -112,7 +121,7 @@ export function TodayPlan({ tasks, onOpen }: { tasks: Task[]; onOpen: (farmId: s
       </View>
       <Meter value={tasks.length ? (count / tasks.length) * 100 : 100} color={Colors.success} />
       <View>
-        {tasks.map((t, i) => {
+        {(limit ? tasks.slice(0, limit) : tasks).map((t, i) => {
           const isDone = done.includes(t.id);
           const Icon = t.icon;
           return (

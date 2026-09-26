@@ -13,6 +13,7 @@ import { SectionHeader } from '@/components/ui/section-header';
 import { Card, Divider } from '@/components/ui/surface';
 import { Txt } from '@/components/ui/text';
 import { Colors, MaxContentWidth, Palette, Radius } from '@/constants/theme';
+import { useDemo } from '@/data/demo';
 import { getFarm } from '@/data/farms';
 import {
   GDD_BASE_C,
@@ -31,7 +32,8 @@ export default function RowDetailScreen() {
   const params = useLocalSearchParams<{ farmId: string; row: string }>();
   const farm = getFarm(params.farmId);
   const rowNo = Number(params.row) || 1;
-  const det = getRow(farm.id, rowNo);
+  const { newPods } = useDemo();
+  const det = getRow(farm.id, rowNo, newPods);
   const { width } = useWindowDimensions();
   const snapWidth = Math.min(width, MaxContentWidth) - 48;
 

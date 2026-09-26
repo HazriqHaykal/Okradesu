@@ -38,16 +38,19 @@ export async function checkPod(input: { base64?: string; seed: string; farmId?: 
   return simulate(input.seed);
 }
 
-/** Deterministic stand-in so the flow can be demoed before the model exists. */
-async function simulate(seed: string): Promise<PodCheckResult> {
+/**
+ * Stand-in until the model is live. Predictable on stage: the first check is
+ * always a ready 7.5 cm pod, then it cycles through the other outcomes.
+ */
+const DEMO_LENGTHS = [7.5, 8.3, 6.2, 12.8];
+let demoIndex = 0;
+
+async function simulate(_seed: string): Promise<PodCheckResult> {
   await new Promise((r) => setTimeout(r, 900));
-  let h = 0;
-  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
-  const lengthCm = Math.round((5.5 + (h % 80) / 10) * 10) / 10; // 5.5–13.4 cm
-  const confidence = 0.82 + ((h >> 8) % 15) / 100;
+  const lengthCm = DEMO_LENGTHS[demoIndex++ % DEMO_LENGTHS.length];
   return {
     lengthCm,
-    confidence,
+    confidence: 0.94,
     box: { x: 0.18, y: 0.34, w: 0.64, h: 0.3 },
     reference: 'coin',
     ...gradePod(lengthCm),

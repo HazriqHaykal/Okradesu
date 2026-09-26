@@ -268,7 +268,7 @@ const INDOOR_EXTRA: Record<string, Pick<MonitorFarm, 'base' | 'rowLight' | 'ener
   },
 };
 
-const INDOOR: MonitorFarm[] = FARMS.map((f) => ({
+const INDOOR: MonitorFarm[] = FARMS.filter((f) => f.kind === 'indoor').map((f) => ({
   id: f.id,
   name: f.name,
   type: 'indoor' as const,
@@ -287,7 +287,13 @@ const INDOOR: MonitorFarm[] = FARMS.map((f) => ({
   ...INDOOR_EXTRA[f.id],
 }));
 
-export const MONITOR_FARMS: MonitorFarm[] = [...OUTDOOR, ...INDOOR];
+/** Outdoor pod counts come from the same camera detections as the harvest map. */
+const OUTDOOR_LIVE: MonitorFarm[] = OUTDOOR.map((o) => {
+  const f = FARMS.find((x) => x.id === o.id);
+  return f ? { ...o, podsReady: f.podsReady, newFlowers: f.newFlowers, inHarvest: true } : o;
+});
+
+export const MONITOR_FARMS: MonitorFarm[] = [...OUTDOOR_LIVE, ...INDOOR];
 
 export const getMonitorFarm = (id: string | undefined) =>
   MONITOR_FARMS.find((f) => f.id === id) ?? MONITOR_FARMS[0];
