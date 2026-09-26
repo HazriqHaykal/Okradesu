@@ -1,0 +1,16 @@
+# Okradesu Crop Health AI (api.py). Versions match the working .venv-gpu (Python 3.11).
+# Install:  python -m pip install -r requirements.txt
+
+# CUDA 12.8 builds of PyTorch (the default index only has CPU builds).
+--extra-index-url https://download.pytorch.org/whl/cu128
+torch==2.11.0+cu128
+torchvision==0.26.0+cu128
+
+# YOLO model (imports torch, opencv-python, numpy)
+ultralytics==8.4.163
+
+# API server
+fastapi==0.141.1
+uvicorn==0.54.0
+python-multipart==0.0.32  # needed by FastAPI for the /predict file upload
+pillow==12.3.0            # used directly by api.py (PIL.Image)
