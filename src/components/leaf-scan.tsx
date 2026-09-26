@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/surface';
 import { Txt } from '@/components/ui/text';
 import { Colors, Radius } from '@/constants/theme';
-import { analyzeCropHealth, type CropHealthResult } from '@/services/cropHealthAI';
+import { analyzeCropHealth, CropHealthError, type CropHealthResult } from '@/services/cropHealthAI';
 
 type Capture = { uri: string; from: 'phone' | 'photos' };
 
@@ -22,13 +22,22 @@ const FROM_LABEL: Record<Capture['from'], string> = {
 };
 
 function describeError(e: unknown): string {
-  const message = e instanceof Error ? e.message : '';
-  if (/network request failed|failed to fetch/i.test(message)) {
-    return 'Can’t reach the Crop Health server. Check that it’s running and that this device is on the same network, then try again.';
+  if (!(e instanceof CropHealthError)) return 'Unable to analyze the image. Please try again.';
+  switch (e.kind) {
+    case 'no_image':
+      return 'No photo to analyze. Retake the photo and try again.';
+    case 'network':
+      return 'Can’t reach the Crop Health server. Check that it’s running and that this device is on the same Wi-Fi as the computer, then try again.';
+    case 'timeout':
+      return 'The Crop Health server took too long to respond. Check your connection and try again.';
+    case 'http':
+      if (e.status === 400 || e.status === 422) {
+        return 'The server couldn’t read this photo. Retake it and try again.';
+      }
+      return `The Crop Health server couldn’t analyze this photo (error ${e.status}). Try again in a moment.`;
+    case 'invalid_response':
+      return 'The Crop Health server sent an unexpected reply. Try again in a moment.';
   }
-  const status = message.match(/API error: (\d+)/)?.[1];
-  if (status) return `The Crop Health server couldn’t analyze this photo (error ${status}). Try again in a moment.`;
-  return 'Something went wrong while analyzing the photo. Try again.';
 }
 
 /**
@@ -72,8 +81,10 @@ export function LeafScan({ header, onBusyChange }: { header: ReactNode; onBusyCh
     setCapturing(true);
     try {
       const picture = await camera.current.takePictureAsync({ quality: 0.8 });
+      if (!picture?.uri) throw new Error('Camera returned no image URI');
       select(picture.uri, 'phone');
-    } catch {
+    } catch (e) {
+      console.warn('[LeafScan] takePictureAsync failed:', e);
       setError('Couldn’t take the photo. Try again.');
     } finally {
       setCapturing(false);
@@ -83,23 +94,32 @@ export function LeafScan({ header, onBusyChange }: { header: ReactNode; onBusyCh
   const pickFromPhotos = async () => {
     try {
       const picked = await ImagePicker.launchImageLibraryAsync({ mediaTypes: 'images', quality: 0.8 });
-      if (!picked.canceled) select(picked.assets[0].uri, 'photos');
-    } catch {
+      if (picked.canceled) return;
+      const uri = picked.assets?.[0]?.uri;
+      if (uri) select(uri, 'photos');
+      else setError('Couldn’t load that photo. Pick another one.');
+    } catch (e) {
+      console.warn('[LeafScan] launchImageLibraryAsync failed:', e);
       setError('Couldn’t open your photos. Check that Okradesu is allowed to access them.');
     }
   };
 
   const analyze = async () => {
-    if (!capture || analyzing) return;
+    if (analyzing) return;
+    if (!capture?.uri) {
+      setError(describeError(new CropHealthError('no_image', 'No captured image')));
+      return;
+    }
     setAnalyzing(true);
     onBusyChange(true);
     setResult(null);
     setError(null);
     try {
       const res = await analyzeCropHealth(capture.uri);
-      if (res.success === false) throw new Error('unsuccessful');
+      if (res.success === false) throw new CropHealthError('invalid_response', 'success: false');
       setResult(res);
     } catch (e) {
+      console.warn('[LeafScan] analyze failed:', e);
       setError(describeError(e));
     } finally {
       setAnalyzing(false);

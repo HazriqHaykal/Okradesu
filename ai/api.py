@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 from ultralytics import YOLO
 
 
@@ -71,9 +71,18 @@ async def predict(file: UploadFile = File(...)):
     # Read uploaded image
     image_bytes = await file.read()
 
-    image = Image.open(
-        __import__("io").BytesIO(image_bytes)
-    ).convert("RGB")
+    if not image_bytes:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+
+    try:
+        image = Image.open(
+            __import__("io").BytesIO(image_bytes)
+        ).convert("RGB")
+    except (UnidentifiedImageError, OSError) as e:
+        print(f"/predict: could not decode upload "
+              f"(filename={file.filename!r}, content_type={file.content_type!r}, "
+              f"bytes={len(image_bytes)}): {e}")
+        raise HTTPException(status_code=400, detail="Uploaded file is not a readable image.")
 
     # Run YOLO
     results = model.predict(

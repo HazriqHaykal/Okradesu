@@ -1,18 +1,50 @@
-import { Bell, TriangleAlert } from 'lucide-react-native';
+import { router } from 'expo-router';
+import { Bell, Check, MessageCircle, Send, TriangleAlert } from 'lucide-react-native';
+import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { CropScanner } from '@/components/crop-scanner';
 import { Screen } from '@/components/screen';
 import { Badge } from '@/components/ui/badge';
-import { IconButton } from '@/components/ui/button';
+import { Button, IconButton } from '@/components/ui/button';
+import { SearchField } from '@/components/ui/search-field';
 import { ScreenTitle, SectionHeader } from '@/components/ui/section-header';
 import { Card, Meter } from '@/components/ui/surface';
 import { Txt } from '@/components/ui/text';
 import { Colors, Radius, Shadow } from '@/constants/theme';
-import { MAIN_RISK, OTHER_RISKS, getFarm } from '@/data/farms';
+import { MAIN_RISK, OTHER_RISKS, TIPS, getFarm, type AdvisorTip } from '@/data/farms';
 
 export default function DiseaseScreen() {
   const riskFarm = getFarm(MAIN_RISK.farmId);
+  const [applied, setApplied] = useState<Record<string, boolean>>({});
+  const [dismissed, setDismissed] = useState<Record<string, boolean>>({});
+  const [question, setQuestion] = useState('');
+  const [asked, setAsked] = useState<string[]>([]);
+
+  const runTip = (tip: AdvisorTip) => {
+    if (tip.kind === 'map') {
+      if (tip.row) {
+        router.navigate({
+          pathname: '/harvest/[farmId]/[row]',
+          params: { farmId: tip.farmId, row: String(tip.row) },
+        });
+      } else {
+        router.navigate({ pathname: '/harvest', params: { farm: tip.farmId } });
+      }
+      return;
+    }
+    setApplied((a) => ({ ...a, [tip.id]: true }));
+  };
+
+  const ask = () => {
+    const q = question.trim();
+    if (!q) return;
+    setAsked((list) => [...list, q]);
+    setQuestion('');
+  };
+
+  const tips = TIPS.filter((t) => !dismissed[t.id]);
+
   return (
     <Screen>
       <ScreenTitle
@@ -70,6 +102,72 @@ export default function DiseaseScreen() {
           </View>
         ))}
       </View>
+
+      <SectionHeader title="What To Do Next" />
+      {tips.length === 0 ? (
+        <Txt variant="body" color={Colors.textSecondary}>
+          You&apos;re all caught up. We&apos;ll suggest the next step when something changes.
+        </Txt>
+      ) : null}
+      {tips.map((tip) => {
+        const farm = getFarm(tip.farmId);
+        const isApplied = applied[tip.id];
+        return (
+          <Card key={tip.id} style={styles.tip}>
+            <Txt variant="micro" color={Colors.textSecondary}>
+              {farm.building} · {farm.name}
+            </Txt>
+            <Txt variant="heading" style={{ lineHeight: 22 }}>
+              {tip.title}
+            </Txt>
+            <Txt variant="body" color={Colors.textBody}>
+              {tip.why}
+            </Txt>
+            {isApplied ? (
+              <Badge label="Sent to controller" tone="success" icon={Check} />
+            ) : (
+              <View style={styles.tipActions}>
+                <Button label={tip.action} size="md" onPress={() => runTip(tip)} style={{ flexGrow: 1 }} />
+                <Button
+                  label="Not now"
+                  size="md"
+                  variant="secondary"
+                  onPress={() => setDismissed((d) => ({ ...d, [tip.id]: true }))}
+                />
+              </View>
+            )}
+          </Card>
+        );
+      })}
+
+      {asked.map((q, i) => (
+        <View key={i} style={{ gap: 8 }}>
+          <View style={styles.bubbleMe}>
+            <Txt variant="body" weight={600}>
+              {q}
+            </Txt>
+          </View>
+          <Card style={styles.bubbleAi}>
+            <Txt variant="body" color={Colors.textBody}>
+              Thanks — we&apos;re checking this against today&apos;s sensor readings and camera scans. The
+              answer will appear here and in LINE.
+            </Txt>
+          </Card>
+        </View>
+      ))}
+
+      <View style={styles.askRow}>
+        <SearchField
+          icon={MessageCircle}
+          label="Ask the advisor"
+          placeholder="Ask about your farm"
+          value={question}
+          onChangeText={setQuestion}
+          onSubmitEditing={ask}
+          returnKeyType="send"
+        />
+        <IconButton icon={Send} label="Send question" variant="accent" size={46} onPress={ask} />
+      </View>
     </Screen>
   );
 }
@@ -90,4 +188,17 @@ const styles = StyleSheet.create({
     boxShadow: Shadow.tile,
     gap: 6,
   },
+  tip: { padding: 16, gap: 10 },
+  tipActions: { flexDirection: 'row', gap: 8 },
+  bubbleMe: {
+    alignSelf: 'flex-end',
+    maxWidth: '85%',
+    backgroundColor: Colors.surfaceTint,
+    borderRadius: Radius.lg,
+    borderBottomRightRadius: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+  },
+  bubbleAi: { maxWidth: '90%', padding: 14, borderBottomLeftRadius: 6 },
+  askRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
 });
