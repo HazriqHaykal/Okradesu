@@ -83,7 +83,7 @@ Deno.serve(async (req) => {
       );
       const { data, error } = await db
         .from('agent_briefings')
-        .insert({ summary: reply, proposals: ctx.proposals })
+        .insert({ summary: reply, proposals: ctx.proposals, trace })
         .select()
         .single();
       if (error) throw new Error(`Could not save the briefing: ${error.message}`);
@@ -113,6 +113,7 @@ Deno.serve(async (req) => {
   } catch (e) {
     await step('orchestrator', 'stopped with an error');
     if (e instanceof ApiError) {
+      if (e.status === 402) return json({ error: 'Gemini credits are used up. Top up in AI Studio (ai.studio/projects → Billing), then try again.' }, 402);
       if (e.status === 429 || e.status === 503) return json({ error: 'The advisor is busy right now. Try again in a minute.' }, 503);
       if (e.status === 400 || e.status === 403) return json({ error: `The advisor is not set up correctly (${e.status}). Check GEMINI_API_KEY.` }, 500);
       return json({ error: `Advisor error (${e.status}). Try again.` }, 502);

@@ -493,3 +493,43 @@ export async function runTool(ctx: ToolContext, name: string, input: any): Promi
     return { ok: false, error: e instanceof ToolError ? e.message : `Tool failed: ${e instanceof Error ? e.message : String(e)}` };
   }
 }
+
+// ── References: what data each tool call read ──────────────────────
+/** A short citation shown to the farmer, e.g. "Live sensors · 5/6 farms · 08:09". */
+export type Source = { tool: string; label: string; detail: string };
+
+const jstClock = (d = new Date()) => new Date(d.getTime() + JST_MS).toISOString().slice(11, 16);
+
+// deno-lint-ignore no-explicit-any
+export function sourceOf(ctx: ToolContext, name: string, input: any, outcome: ToolOutcome): Source | null {
+  if (!outcome.ok) return null;
+  // deno-lint-ignore no-explicit-any
+  const r = outcome.result as any;
+  const farm = (id: string) => ctx.farms.find((f) => f.id === id)?.name ?? id;
+  switch (name) {
+    case 'get_farms_overview': {
+      const online = (r as { link: string }[]).filter((f) => f.link === 'online').length;
+      return { tool: name, label: 'Live sensors', detail: `${online}/${r.length} farms reporting · ${jstClock()}` };
+    }
+    case 'get_sensor_history':
+      return { tool: name, label: 'Sensor history', detail: `${farm(input.farm_id)} · last ${input.hours} h` };
+    case 'get_weather':
+      return { tool: name, label: 'Weather', detail: `Open-Meteo · 3-day forecast · ${jstClock()}` };
+    case 'get_harvest_plan':
+      return {
+        tool: name,
+        label: 'Camera counts',
+        detail: r.rows_by_urgency ? `${ctx.today} · ${r.rows_by_urgency.length} rows · ${r.total_ready} ready` : `${ctx.today} · none yet`,
+      };
+    case 'get_market_outlook':
+      return {
+        tool: name,
+        label: 'Market forecast',
+        detail: `7 days from ${ctx.today} · ${r.surplus_alerts.length} surplus alerts`,
+      };
+    case 'get_listings':
+      return { tool: name, label: 'Listings', detail: `${r.length} from today · buyers' reservations` };
+    default:
+      return null; // propose_* tools don't read data
+  }
+}

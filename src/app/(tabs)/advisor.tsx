@@ -1,8 +1,8 @@
-import { router } from 'expo-router';
-import { X } from 'lucide-react-native';
+import { Bell } from 'lucide-react-native';
 
 import { AgentChat } from '@/components/advisor/agent-chat';
 import { BriefingCard } from '@/components/advisor/briefing-card';
+import { AgentDataFeed } from '@/components/advisor/data-feed';
 import { Screen } from '@/components/screen';
 import { IconButton } from '@/components/ui/button';
 import { ScreenTitle, SectionHeader } from '@/components/ui/section-header';
@@ -14,20 +14,19 @@ import { agentAvailable } from '@/services/agent';
 /**
  * AI advisor: the morning plan plus a chat with the agent team (an
  * orchestrator and Monitor, Crop Health, Harvest and Market specialists).
- * Opened from the Home header.
+ * The middle tab.
  */
 export default function AdvisorScreen() {
-  const close = () => (router.canGoBack() ? router.back() : router.replace('/home'));
-
   return (
-    <Screen withTabBar={false}>
+    <Screen>
       <ScreenTitle
         kicker="AI agent team · all farms"
         title="Advisor"
-        right={<IconButton icon={X} label="Close advisor" onPress={close} />}
+        right={<IconButton icon={Bell} label="Alerts" href="/alerts" />}
       />
       {agentAvailable ? (
         <>
+          <AgentDataFeed />
           <BriefingCard />
           <SectionHeader title="Ask the Advisor" />
           <AgentChat />
