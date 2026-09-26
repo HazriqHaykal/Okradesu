@@ -5,7 +5,8 @@ import { CHAPTERS, DURATION, sampleState } from './simulation.mjs';
 
 const $ = (id) => document.getElementById(id);
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const state = { chapter: 0, elapsed: 0, playing: false, orbit: false, labels: true, clean: false, selected: null, time: 0 };
+const state = { chapter: 0, elapsed: 0, playing: false, orbit: false, labels: true, clean: false, selected: null, time: 0, roofOpen: false, roofProgress: 0 };
+const roofPanels = [];
 const equipment = [];
 let renderer, scene, camera, controls, model, effects, cameraMove;
 let scanPlane, scanBoxes, selectionRing, pumpRotor, statusLamp, cloudLink;
@@ -104,6 +105,58 @@ function makeTree(x,z,s=1) {
   const g=group('Boundary tree',[x,0,z]);g.scale.setScalar(s);
   cylinder(.11,.17,1.6,mat('#89745b'),[0,.65,0],g,6);
   for(const [a,b,c,r] of [[0,2,0,.75],[-.38,1.65,.2,.58],[.38,1.7,.05,.6],[0,1.8,-.35,.59]])mesh(new THREE.IcosahedronGeometry(r,1),mat(c<0?'#75916a':'#91a574'),[a,b,c],g);
+}
+
+function makeRoof() {
+  const roof = group('Retractable greenhouse roof');
+  const frame = mat('#7e998c', { metalness: .45, roughness: .45 });
+  const glazing = mat('#b5dbd1', { transparent: true, opacity: .42, roughness: .28, side: THREE.DoubleSide, depthWrite: false });
+  const left = -5.6, right = 5.7, center = .05, eave = 3.25, ridge = 4.75;
+  for (const x of [left, right]) {
+    for (const z of [-5.1, 0, 5.1]) {
+      box([.32,.12,.32], materials.cream, [x,0,z], roof);
+      box([.1,eave,.1], frame, [x,eave/2,z], roof);
+    }
+    box([.13,.14,10.5], frame, [x,eave,0], roof);
+  }
+  // Each pitched bay slides along the side rails, nesting at the rear.
+  const halfWidth = (right-left)/2, rise = ridge-eave;
+  for (let i = 0; i < 5; i++) {
+    const panel = group(`Sliding roof bay ${i+1}`, [0,0,0], roof);
+    for (const side of [-1,1]) {
+      const glass = mesh(new THREE.PlaneGeometry(Math.hypot(halfWidth,rise),2.04), glazing, [center+side*halfWidth/2,(ridge+eave)/2,0], panel);
+      glass.rotation.set(-Math.PI/2,side*Math.atan2(rise,halfWidth),0);
+      glass.castShadow = false;
+      for (const z of [-1.02,1.02]) rod(v3(center,ridge,z),v3(center+side*halfWidth,eave,z),.035,frame,panel);
+      box([.06,.06,2.04],frame,[center+side*halfWidth,eave,0],panel);
+    }
+    box([.09,.09,2.04],frame,[center,ridge,0],panel);
+    roofPanels.push(panel);
+  }
+  updateRoofGeometry();
+}
+
+function updateRoofGeometry() {
+  const p = state.roofProgress, eased = p*p*(3-2*p);
+  roofPanels.forEach((panel,i) => {
+    panel.position.z = (-4.08+i*2.04)*(1-eased)+(-4.08+i*.12)*eased;
+    panel.position.y = i*.09*eased;
+  });
+}
+
+function updateRoofUI() {
+  const moving = state.roofProgress !== Number(state.roofOpen);
+  $('roof-toggle').textContent = state.roofOpen ? 'Close roof' : 'Open roof';
+  $('roof-toggle').setAttribute('aria-expanded',String(state.roofOpen));
+  $('farm-mode').textContent = moving ? (state.roofOpen ? 'Opening roof…' : 'Closing roof…') : (state.roofOpen ? 'Outdoor farm · Roof open' : 'Indoor farm · Roof closed');
+  $('farm-mode').dataset.mode = state.roofOpen ? 'outdoor' : 'indoor';
+  if(state.chapter===0) $('chapter-note').textContent = state.roofOpen ? 'OPEN-AIR GROWING · RETRACTABLE ROOF' : 'COVERED GROWING · RETRACTABLE ROOF';
+}
+
+function toggleRoof() {
+  state.roofOpen = !state.roofOpen;
+  if(reducedMotion) { state.roofProgress = Number(state.roofOpen); updateRoofGeometry(); }
+  updateRoofUI();
 }
 
 function makeHardware() {
@@ -221,7 +274,7 @@ function init() {
   const fill=new THREE.DirectionalLight('#d0e5ed',1.3);fill.position.set(10,8,-10);scene.add(fill);
   const floor=mesh(new THREE.PlaneGeometry(200,200),mat('#eeeddf'),[0,-1.1,0],scene);floor.rotation.x=-Math.PI/2;floor.castShadow=false;
   model=group('Okradesu — Connected Field A',[0,0,0],scene);effects=group('Simulation overlays',[0,0,0],scene);
-  makeGround();makeCrops();makeHardware();makeFarmDetails();makeEffects();
+  makeGround();makeCrops();makeHardware();makeFarmDetails();makeRoof();makeEffects();
   controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.dampingFactor=.065;controls.minDistance=12;controls.maxDistance=47;controls.maxPolarAngle=Math.PI*.465;controls.minPolarAngle=.2;controls.enablePan=false;controls.autoRotateSpeed=.45;
   controls.addEventListener('start',()=>{cameraMove=null;pause();});
   renderer.domElement.addEventListener('pointerdown',pointerDown);renderer.domElement.addEventListener('pointerup',pointerUp);
@@ -252,7 +305,7 @@ function moveCamera(chapter,instant=false) {
 function setChapter(index,instant=false,elapsed=0) {
   state.chapter=index;state.elapsed=elapsed;state.selected=null;selectionRing.visible=false;$('inspector').hidden=true;
   const c=CHAPTERS[index];$('chapter-no').textContent=`${String(index+1).padStart(2,'0')} / 07`;$('chapter-category').textContent=c.category;$('chapter-title').innerHTML=c.title;$('chapter-description').textContent=c.description;$('chapter-note').textContent=c.note;$('recording-step').textContent=`${String(index+1).padStart(2,'0')} — ${c.name}`;
-  document.querySelectorAll('#chapters button').forEach((b,i)=>{if(i===index)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current');});moveCamera(c,instant);updateSimulation();
+  document.querySelectorAll('#chapters button').forEach((b,i)=>{if(i===index)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current');});moveCamera(c,instant);updateSimulation();updateRoofUI();
 }
 function pause(){state.playing=false;$('play').textContent=state.chapter===6&&state.elapsed>=DURATION?'▶ Replay guided tour':'▶ Play guided tour';}
 function play(){if(state.chapter===6&&state.elapsed>=DURATION)setChapter(0);state.playing=true;state.orbit=false;controls.autoRotate=false;$('orbit').setAttribute('aria-pressed','false');$('play').textContent='Ⅱ Pause tour';}
@@ -268,6 +321,8 @@ function bindUI(){
   $('orbit').addEventListener('click',()=>{pause();cameraMove=null;state.orbit=!state.orbit;controls.autoRotate=state.orbit;$('orbit').setAttribute('aria-pressed',String(state.orbit));});
   $('label-toggle').addEventListener('click',()=>{state.labels=!state.labels;$('label-toggle').setAttribute('aria-pressed',String(state.labels));});
   $('clean').addEventListener('click',toggleClean);$('exit-clean').addEventListener('click',toggleClean);
+  $('roof-toggle').addEventListener('click',toggleRoof);
+  document.addEventListener('keydown',(e)=>{if(!e.repeat&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)&&!e.target.isContentEditable&&e.key.toLowerCase()==='r')toggleRoof();});
   $('close-inspector').addEventListener('click',()=>{state.selected=null;selectionRing.visible=false;$('inspector').hidden=true;});
   $('export-model').addEventListener('click',async()=>{const b=$('export-model');b.disabled=true;b.textContent='Exporting…';try{const data=await exportModel();download(new Blob([data],{type:'model/gltf-binary'}),'okradesu-connected-field.glb');toast('3D model exported. Open it in Blender or compatible slide software.');}catch(e){toast(`Export failed: ${e.message}`);}finally{b.disabled=false;b.textContent='Export 3D';}});
   document.addEventListener('keydown',(e)=>{if(e.repeat||e.ctrlKey||e.metaKey||e.altKey||/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;if(e.code==='Space'&&e.target.tagName!=='BUTTON'){e.preventDefault();togglePlay();}else if(e.key.toLowerCase()==='h')toggleClean();else if(e.key.toLowerCase()==='f')fullscreen();else if(e.key==='Escape'&&state.clean)toggleClean();else if(e.key==='ArrowRight'){pause();setChapter(Math.min(6,state.chapter+1),false,4);}else if(e.key==='ArrowLeft'){pause();setChapter(Math.max(0,state.chapter-1),false,4);}});
@@ -313,6 +368,12 @@ function tick(dt){
   if(state.playing){state.elapsed+=dt;while(state.elapsed>=DURATION){if(state.chapter<6)setChapter(state.chapter+1,false,state.elapsed-DURATION);else{state.elapsed=DURATION;pause();if(!state.clean)toast('Tour complete. Replay or explore the field.');break;}}}
   dt=Math.min(dt,.05);
   state.time+=dt;
+  if(state.roofProgress!==Number(state.roofOpen)) {
+    const target = Number(state.roofOpen), step = dt/1.6;
+    state.roofProgress = state.roofOpen ? Math.min(target,state.roofProgress+step) : Math.max(target,state.roofProgress-step);
+    updateRoofGeometry();
+    if(state.roofProgress===target) updateRoofUI();
+  }
   if(cameraMove){cameraMove.t=Math.min(1,cameraMove.t+dt/2.1);const t=cameraMove.t,tween=t*t*(3-2*t);camera.position.lerpVectors(cameraMove.from,cameraMove.to,tween);controls.target.lerpVectors(cameraMove.fromTarget,cameraMove.toTarget,tween);if(t>=1)cameraMove=null;}
   controls.update(dt);
   uiTime+=dt;if(uiTime>.08){updateSimulation();uiTime=0;}

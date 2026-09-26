@@ -2,6 +2,11 @@
   "passed": true,
   "browser": "Chrome",
   "checked": [
+    "roof open/close and reversal",
+    "roof persists on restart",
+    "roof keyboard control in recording view",
+    "roof reduced motion",
+    "roof mobile control",
     "7 chapters",
     "scenario rules",
     "equipment inspector",
@@ -22,7 +27,9 @@
     "labels": true,
     "clean": false,
     "selected": null,
-    "time": 26.381300000000678,
+    "time": 31.524900000000965,
+    "roofOpen": true,
+    "roofProgress": 1,
     "moisture": 42,
     "pump": false,
     "scan": false,
@@ -30,7 +37,7 @@
     "buffered": 0,
     "dry": false,
     "progress": 0,
-    "drawCalls": 263,
-    "triangles": 24896
+    "drawCalls": 331,
+    "triangles": 25876
   }
 }

@@ -35,11 +35,12 @@ This is a **concept simulation**, using illustrative readings and accelerated ti
 ## Explore
 
 - Drag to rotate; scroll to zoom.
+- **Open roof / Close roof** switches between the covered indoor farm and the open-air outdoor view. Five translucent roof bays retract toward the back so you can see the crops. Press **R** to toggle the roof, including during recording. The mode label stays visible; the roof choice is retained across chapters and Restart. Reduced-motion users get an immediate transition.
 - Click equipment or a label to read its role.
 - **Space** plays/pauses the tour; **← / →** change chapters; **F** toggles full screen; **H** toggles recording view.
 - **Orbit** starts a slow rotating view. Manual camera interaction pauses the guided tour.
 - **Labels** toggles equipment labels. Labels automatically hide when they collide with captions or one another.
-- **Export 3D** downloads the static farm model as GLB. Browser captions, lighting environment, water/data effects and tour animation are not included. Use the browser recording for the full animated experience.
+- **Export 3D** downloads the static farm model as GLB, including the roof in its current position. Browser captions, lighting environment, water/data effects and tour animation are not included. Use the browser recording for the full animated experience.
 
 ## Ready-made assets
 

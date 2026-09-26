@@ -1,10 +1,10 @@
+import { Image } from 'expo-image';
 import { Link, router, useLocalSearchParams } from 'expo-router';
 import { Activity, ChevronLeft, RadioTower, SlidersHorizontal, Sun, Warehouse } from 'lucide-react-native';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { CameraCard } from '@/components/monitor/camera-card';
 import { DemoTrigger } from '@/components/monitor/demo-panel';
 import { FarmMonitor } from '@/components/monitor/farm-monitor';
 import { SmartControl, type Effective } from '@/components/monitor/smart-control';
@@ -15,17 +15,21 @@ import { Segmented } from '@/components/ui/chip';
 import { InfoStat } from '@/components/ui/section-header';
 import { Txt } from '@/components/ui/text';
 import { Colors, Palette, Radius, Shadow, TabBarSpace } from '@/constants/theme';
-import { useDemo } from '@/data/demo';
 import { useFarm } from '@/hooks/use-farms';
 import { lightsScheduledOn, useDeviceControl, useLiveFarm } from '@/hooks/use-live-farm';
 import { useWeather } from '@/hooks/use-weather';
 
 type View_ = 'monitor' | 'control';
 
+/** 3D overview of how a field is wired up: sensors, gateway, climate station and camera. */
+const SCENES = {
+  indoor: { source: require('@/assets/images/farm-indoor.webp'), ratio: 1100 / 793 },
+  outdoor: { source: require('@/assets/images/farm-outdoor.webp'), ratio: 1182 / 847 },
+};
+
 export default function FarmDetailScreen() {
   const { id, view } = useLocalSearchParams<{ id: string; view?: View_ }>();
   const farm = useFarm(id);
-  const demo = useDemo();
   const insets = useSafeAreaInsets();
   const [tab, setTab] = useState<View_>(view === 'control' ? 'control' : 'monitor');
   const control = useDeviceControl(farm);
@@ -55,11 +59,14 @@ export default function FarmDetailScreen() {
         <IconButton icon={ChevronLeft} label="Back" onPress={goBack} />
       </View>
       <View style={styles.renderWrap}>
-        <CameraCard
-          farm={farm}
-          online={farm.status === 'online'}
-          extraReady={farm.id === 'field-a' ? demo.newPods : 0}
-        />
+        <View style={styles.scene}>
+          <Image
+            source={SCENES[outdoor ? 'outdoor' : 'indoor'].source}
+            style={{ width: '100%', aspectRatio: SCENES[outdoor ? 'outdoor' : 'indoor'].ratio }}
+            contentFit="contain"
+            accessibilityLabel={`${farm.name} setup: LoRa gateway, soil sensor, climate station and camera with edge AI${outdoor ? '' : ' under a greenhouse roof'}.`}
+          />
+        </View>
       </View>
 
       <View style={[styles.sheet, { paddingBottom: insets.bottom + TabBarSpace }]}>
@@ -132,6 +139,8 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 0, paddingBottom: 0, gap: 0, flexGrow: 1 },
   topRow: { paddingHorizontal: 24, flexDirection: 'row' },
   renderWrap: { paddingHorizontal: 24, paddingTop: 12 },
+  // Same cream as the render's own background, so its edges disappear.
+  scene: { backgroundColor: '#F5F2E9', borderRadius: Radius.xl, overflow: 'hidden', boxShadow: Shadow.card },
   sheet: {
     flexGrow: 1,
     marginTop: 20,
