@@ -1,0 +1,7 @@
+{
+  "imports": {
+    "@/lib/forecast": "../../../src/lib/forecast.ts",
+    "@/constants/market": "../../../src/constants/market.ts",
+    "@/types/market": "../../../src/types/market.ts"
+  }
+}
