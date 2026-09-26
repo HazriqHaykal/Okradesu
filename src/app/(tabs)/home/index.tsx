@@ -3,66 +3,32 @@ import { ArrowRight, Bell, ChevronDown, ChevronUp, LayoutDashboard, RadioTower }
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
+import { farmStatus, type FarmStatus } from '@/components/farm-status';
 import { DemoTrigger } from '@/components/monitor/demo-panel';
 import { TodayPlan, buildPlan } from '@/components/monitor/today-plan';
 import { Screen } from '@/components/screen';
 import { Button, IconButton } from '@/components/ui/button';
 import { ScreenTitle, SectionHeader } from '@/components/ui/section-header';
 import { Txt } from '@/components/ui/text';
-import { Colors, Palette, Radius, Shadow } from '@/constants/theme';
+import { Colors, Radius, Shadow } from '@/constants/theme';
 import { planTotals } from '@/data/harvest';
-import { alertsFor, type FarmAlert, type MonitorFarm } from '@/data/monitor';
+import type { MonitorFarm } from '@/data/monitor';
 import { displayName, greeting } from '@/data/profile';
-import { useFarms } from '@/hooks/use-farms';
+import { useFarmAlerts } from '@/hooks/use-farm-alerts';
 import { useHarvest } from '@/hooks/use-harvest';
-import { useWeather } from '@/hooks/use-weather';
 
 /** Tasks shown before "See all". */
 const TOP_TASKS = 3;
 
 const openFarm = (id: string) => router.push({ pathname: '/home/farm/[id]', params: { id } });
 
-type Status = { label: string; color: string; tone: 'ok' | 'warn' | 'bad' };
-
-/** One word per farm, so a judge can read the whole grid in a glance. */
-function farmStatus(farm: MonitorFarm, alerts: FarmAlert[]): Status {
-  const mine = alerts.filter((a) => a.farmId === farm.id);
-  const disaster = mine.find((a) => a.kind === 'disaster');
-  if (disaster)
-    return { label: farm.hazard === 'flood' ? 'Flood risk' : 'Landslide', color: Colors.danger, tone: 'bad' };
-  if (farm.risk) return { label: farm.risk, color: Colors.danger, tone: 'bad' };
-  if (mine.some((a) => a.severity === 'critical'))
-    return { label: 'Needs you', color: Colors.danger, tone: 'bad' };
-  if (farm.status === 'local') return { label: 'Offline', color: Colors.accent, tone: 'warn' };
-  const first = mine[0];
-  if (first) {
-    const label = first.id.endsWith('-moisture')
-      ? 'Dry soil'
-      : first.id.endsWith('-ec')
-        ? 'Low nutrients'
-        : first.kind === 'facility'
-          ? 'Fix device'
-          : first.kind === 'network'
-            ? 'Offline'
-            : 'Check';
-    return { label, color: Colors.accent, tone: 'warn' };
-  }
-  return { label: 'All good', color: Colors.success, tone: 'ok' };
-}
-
 export default function HomeScreen() {
-  const { weather } = useWeather();
-  const farms = useFarms();
+  const { farms, alerts, weather } = useFarmAlerts();
   const { plan } = useHarvest();
   const totals = planTotals(plan);
   const [showAll, setShowAll] = useState(false);
   const [now] = useState(() => new Date());
 
-  // Same alert set as the Alerts tab: events and soil problems, one gateway alert for all farms.
-  const alerts = farms
-    .flatMap((f) => alertsFor(f, weather))
-    .filter((a) => a.kind !== 'sensor' || a.severity === 'critical' || /-(moisture|ec)$/.test(a.id))
-    .filter((a, i, list) => list.findIndex((b) => b.id === a.id) === i);
   const tasks = buildPlan(farms, alerts, weather);
   const online = farms.filter((f) => f.status === 'online').length;
   const today = now.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'short' });
@@ -146,7 +112,7 @@ export default function HomeScreen() {
   );
 }
 
-function FarmTile({ farm, status }: { farm: MonitorFarm; status: Status }) {
+function FarmTile({ farm, status }: { farm: MonitorFarm; status: FarmStatus }) {
   const Icon = farm.icon;
   return (
     <Pressable
@@ -170,19 +136,8 @@ function FarmTile({ farm, status }: { farm: MonitorFarm; status: Status }) {
         {farm.name}
       </Txt>
       <View style={styles.statusRow}>
-        <View style={[styles.dot, { backgroundColor: status.color }]} />
-        <Txt
-          variant="caption"
-          weight={700}
-          numberOfLines={1}
-          color={
-            status.tone === 'bad'
-              ? Colors.dangerFg
-              : status.tone === 'warn'
-                ? Palette.orange800
-                : Colors.successFg
-          }
-          style={{ flexShrink: 1 }}>
+        <View style={[styles.dot, { backgroundColor: status.dot }]} />
+        <Txt variant="caption" weight={700} numberOfLines={1} color={status.text} style={{ flexShrink: 1 }}>
           {status.label}
         </Txt>
       </View>

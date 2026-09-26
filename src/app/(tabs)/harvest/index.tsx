@@ -1,17 +1,8 @@
-import { router } from 'expo-router';
-import {
-  Check,
-  ChevronDown,
-  ChevronRight,
-  ChevronUp,
-  ListChecks,
-  ScanLine,
-  Store,
-} from 'lucide-react-native';
+import { Check, ChevronDown, ChevronRight, ChevronUp, ListChecks, ScanLine } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { LegendSwatch } from '@/components/forecast-chart';
+import { HarvestGrid, UpcomingChart, openRow } from '@/components/harvest-map';
 import { RowSnapshot } from '@/components/illustrations';
 import { Screen } from '@/components/screen';
 import { Badge } from '@/components/ui/badge';
@@ -19,35 +10,14 @@ import { Button, IconButton } from '@/components/ui/button';
 import { ScreenTitle, SectionHeader } from '@/components/ui/section-header';
 import { Card } from '@/components/ui/surface';
 import { Txt } from '@/components/ui/text';
-import { Colors, Palette, Radius, Shadow } from '@/constants/theme';
+import { Colors, Radius, Shadow } from '@/constants/theme';
 import { getFarm } from '@/data/farms';
-import { ago, planTotals, rowsLabel, shortDay, type PlanRow } from '@/data/harvest';
+import { ago, planTotals, rowsLabel, type PlanRow } from '@/data/harvest';
 import { useHarvest } from '@/hooks/use-harvest';
 import { DELIVER_FIRST_HOURS, pickedToday, useHarvestStore } from '@/state/harvest-store';
 
 /** How many rows "Pick in this order" shows. */
 const TOP_ROWS = 3;
-const CELL_GAP = 6;
-
-const openRow = (r: PlanRow) =>
-  router.push({ pathname: '/harvest/[farmId]/[row]', params: { farmId: r.farm.id, row: String(r.row) } });
-
-type Cell = { bg: string; fg: string };
-const CELL: Record<'picked' | 'must' | 'ready' | 'processor' | 'none', Cell> = {
-  picked: { bg: Colors.successFg, fg: Colors.surfaceCard },
-  must: { bg: Colors.danger, fg: Colors.surfaceCard },
-  ready: { bg: Colors.accent, fg: Colors.textOnAccent },
-  processor: { bg: Palette.orange800, fg: Colors.surfaceCard },
-  none: { bg: Colors.surfaceSunken, fg: Colors.textSecondary },
-};
-
-function cellState(r: PlanRow, picked: boolean): keyof typeof CELL {
-  if (picked) return 'picked';
-  if (r.overdue > 0) return 'must';
-  if (r.ready > 0) return 'ready';
-  if (r.overgrown > 0) return 'processor';
-  return 'none';
-}
 
 export default function HarvestMapScreen() {
   const { grid, plan, upcoming } = useHarvest();
@@ -56,12 +26,6 @@ export default function HarvestMapScreen() {
   const remaining = plan.filter((r) => !picked.has(r.key));
   const totals = planTotals(remaining);
   const next = remaining.slice(0, TOP_ROWS);
-  // Size the squares so the farm with the most rows still fits on one line.
-  const [cellsWidth, setCellsWidth] = useState(0);
-  const maxRows = Math.max(...grid.map((g) => g.rows.length), 1);
-  const cellSize = cellsWidth
-    ? Math.min(36, Math.floor((cellsWidth - CELL_GAP * (maxRows - 1)) / maxRows))
-    : 28;
 
   return (
     <Screen>
@@ -87,53 +51,7 @@ export default function HarvestMapScreen() {
 
       {/* The map: one square per growing row */}
       <Card style={styles.map}>
-        {grid.map(({ farm, rows }) => (
-          <View key={farm.id} style={styles.mapRow}>
-            <View style={styles.mapName}>
-              <Txt variant="small" weight={800} numberOfLines={1}>
-                {farm.name}
-              </Txt>
-              <Txt variant="caption" color={Colors.textSecondary}>
-                {farm.kind === 'outdoor' ? 'Outdoor' : 'Indoor'}
-              </Txt>
-            </View>
-            <View style={styles.cells} onLayout={(e) => setCellsWidth(e.nativeEvent.layout.width)}>
-              {rows.map((r) => {
-                const isPicked = picked.has(r.key);
-                const c = CELL[cellState(r, isPicked)];
-                return (
-                  <Pressable
-                    key={r.key}
-                    accessibilityRole="button"
-                    accessibilityLabel={`${farm.name} row ${r.row}: ${isPicked ? 'picked' : `${r.overdue} must pick, ${r.ready} ready`}`}
-                    onPress={() => openRow(r)}
-                    style={({ pressed }) => [
-                      styles.cell,
-                      { width: cellSize, height: cellSize, backgroundColor: c.bg },
-                      pressed && styles.cellPressed,
-                    ]}>
-                    {isPicked ? (
-                      <Check size={14} color={c.fg} strokeWidth={3} />
-                    ) : (
-                      <Txt variant="caption" weight={800} color={c.fg} tabular>
-                        {r.ready || ''}
-                      </Txt>
-                    )}
-                  </Pressable>
-                );
-              })}
-            </View>
-          </View>
-        ))}
-        <View style={styles.legend}>
-          <LegendSwatch color={Colors.danger} label="Must pick" />
-          <LegendSwatch color={Colors.accent} label="Ready" />
-          <LegendSwatch color={Colors.successFg} label="Picked" />
-          <LegendSwatch color={Colors.surfaceSunken} label="Not yet" outlined />
-        </View>
-        <Txt variant="caption" color={Colors.textSecondary}>
-          Each square is one row; the number is pods ready. Tap a row to see what the camera found.
-        </Txt>
+        <HarvestGrid grid={grid} picked={picked} />
       </Card>
 
       {/* What to do now */}
@@ -189,53 +107,6 @@ function NextRow({ rank, row }: { rank: number; row: PlanRow }) {
         </View>
       </View>
       <ChevronRight size={18} color={Colors.textSecondary} strokeWidth={2} />
-    </Pressable>
-  );
-}
-
-/** Bars from the flower countdown: flowers seen today become the coming days' pods. */
-function UpcomingChart({ days }: { days: { date: Date; pods: number }[] }) {
-  const max = Math.max(...days.map((d) => d.pods), 1);
-  const H = 110;
-  return (
-    <Pressable
-      accessibilityRole="link"
-      accessibilityLabel={`Pods expected: ${days.map((d, i) => `${i === 0 ? 'today' : shortDay(d.date)} ${d.pods}`).join(', ')}. Open Market to sell ahead.`}
-      onPress={() => router.navigate('/market')}
-      style={({ pressed }) => [styles.upcoming, pressed && { opacity: 0.85 }]}>
-      <View style={styles.bars}>
-        {days.map((d, i) => (
-          <View key={i} style={styles.barCol}>
-            <Txt variant="small" weight={800} tabular>
-              {d.pods}
-            </Txt>
-            <View
-              style={[
-                styles.bar,
-                { height: Math.max(6, Math.round((d.pods / max) * H)) },
-                i > 0 && styles.barFuture,
-              ]}
-            />
-            <Txt
-              variant="caption"
-              weight={i === 0 ? 800 : 600}
-              color={i === 0 ? Colors.textPrimary : Colors.textSecondary}>
-              {i === 0 ? 'Today' : shortDay(d.date)}
-            </Txt>
-          </View>
-        ))}
-      </View>
-      <View style={styles.upcomingFoot}>
-        <Txt variant="small" color={Colors.textBody} style={{ flex: 1 }}>
-          Predicted from the flowers the camera saw open. Buyers can reserve these pods now.
-        </Txt>
-        <View style={styles.marketLink}>
-          <Store size={14} color={Colors.textAccent} strokeWidth={2} />
-          <Txt variant="small" weight={700} color={Colors.textAccent}>
-            Market
-          </Txt>
-        </View>
-      </View>
     </Pressable>
   );
 }
@@ -320,13 +191,8 @@ function Stat({
 const styles = StyleSheet.create({
   stats: { flexDirection: 'row', gap: 10 },
   stat: { flex: 1, padding: 12, borderRadius: Radius.md, gap: 2, boxShadow: Shadow.tile },
-  map: { padding: 14, gap: 10 },
-  mapRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  mapName: { width: 84 },
-  cells: { flex: 1, flexDirection: 'row', gap: CELL_GAP },
-  cell: { borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  map: { padding: 14 },
   cellPressed: { transform: [{ scale: 0.92 }] },
-  legend: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, paddingTop: 4 },
   done: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -348,19 +214,6 @@ const styles = StyleSheet.create({
   nextPressed: { boxShadow: Shadow.float, transform: [{ translateY: -2 }] },
   thumb: { width: 56, height: 64, borderRadius: Radius.sm, overflow: 'hidden' },
   badges: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  upcoming: {
-    backgroundColor: Colors.surfaceCard,
-    borderRadius: Radius.lg,
-    boxShadow: Shadow.card,
-    padding: 16,
-    gap: 14,
-  },
-  bars: { flexDirection: 'row', alignItems: 'flex-end', gap: 12 },
-  barCol: { flex: 1, alignItems: 'center', gap: 6 },
-  bar: { width: '100%', maxWidth: 48, borderRadius: 8, backgroundColor: Colors.accent },
-  barFuture: { backgroundColor: Palette.orange300 },
-  upcomingFoot: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  marketLink: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   batches: { paddingHorizontal: 16 },
   batchHead: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 14 },
   batchRow: {

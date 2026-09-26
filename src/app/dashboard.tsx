@@ -4,18 +4,24 @@ import {
   ChevronLeft,
   House,
   LayoutDashboard,
+  ListChecks,
   MessageCircle,
-  Printer,
   RadioTower,
   Sprout,
   Store,
+  Sun,
+  Warehouse,
   type LucideIcon,
 } from 'lucide-react-native';
-import { Fragment, type ReactNode } from 'react';
+import { Fragment, useMemo, useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { farmStatus } from '@/components/farm-status';
 import { ForecastChart } from '@/components/forecast-chart';
+import { HarvestGrid, UpcomingChart } from '@/components/harvest-map';
+import { DemoTrigger } from '@/components/monitor/demo-panel';
+import { TodayPlan, buildPlan } from '@/components/monitor/today-plan';
 import { HeroBackground } from '@/components/screen';
 import { Badge, type BadgeTone } from '@/components/ui/badge';
 import { Button, IconButton } from '@/components/ui/button';
@@ -23,23 +29,17 @@ import { SectionHeader } from '@/components/ui/section-header';
 import { Card, Divider } from '@/components/ui/surface';
 import { Txt } from '@/components/ui/text';
 import { Colors, Palette, Radius, Shadow } from '@/constants/theme';
-import {
-  ALERT_EVENTS,
-  BUYERS,
-  FARMS,
-  FARMS_ONLINE,
-  FORECAST_OPEN,
-  FORECAST_TOTAL,
-  TODAY_LABEL,
-  TOTAL_PLANTS,
-  TOTAL_PODS_TODAY,
-  type Farm,
-} from '@/data/farms';
+import { BUYERS, FORECAST_OPEN, FORECAST_TOTAL } from '@/data/farms';
+import { planTotals } from '@/data/harvest';
+import type { FarmAlert, MonitorFarm } from '@/data/monitor';
+import { useFarmAlerts } from '@/hooks/use-farm-alerts';
+import { useHarvest } from '@/hooks/use-harvest';
+import { pickedToday, useHarvestStore } from '@/state/harvest-store';
 
 const NAV: { label: string; icon: LucideIcon; href?: Href }[] = [
   { label: 'Overview', icon: LayoutDashboard },
   { label: 'Farms', icon: House, href: '/home' },
-  { label: 'Harvest maps', icon: Sprout, href: '/harvest' },
+  { label: 'Harvest map', icon: Sprout, href: '/harvest' },
   { label: 'Market', icon: Store, href: '/market' },
   { label: 'Advisor', icon: MessageCircle, href: '/advisor' },
   { label: 'Alerts', icon: Bell, href: '/alerts' },
@@ -51,7 +51,7 @@ const BUYER_BADGE: Record<string, { label: string; tone: BadgeTone }> = {
   pending: { label: 'Pending', tone: 'accent' },
 };
 
-const ALERT_DOT = { accent: Colors.accent, danger: Colors.danger, success: Colors.success } as const;
+const openFarm = (id: string) => router.navigate({ pathname: '/home/farm/[id]', params: { id } });
 
 /** Responsive web dashboard: sidebar at desktop widths, single column on phones. */
 export default function DashboardScreen() {
@@ -59,13 +59,24 @@ export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const wide = width >= 1024;
   const medium = width >= 720;
+
+  const { farms, alerts, weather } = useFarmAlerts();
+  const { grid, plan, upcoming } = useHarvest();
+  const batches = useHarvestStore((s) => s.batches);
+  const picked = useMemo(() => pickedToday(batches), [batches]);
+  const remaining = plan.filter((r) => !picked.has(r.key));
+  const totals = planTotals(remaining);
+  const tasks = buildPlan(farms, alerts, weather);
+  const online = farms.filter((f) => f.status === 'online').length;
+  const critical = alerts.filter((a) => a.severity === 'critical').length;
   const soldPct = Math.round(((FORECAST_TOTAL - FORECAST_OPEN) / FORECAST_TOTAL) * 100);
-  const offline = FARMS.filter((f) => f.status === 'local').length;
+  const [now] = useState(() => new Date());
+  const today = now.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long' });
 
   return (
     <View style={[styles.root, wide && styles.rootWide]}>
       <HeroBackground />
-      {wide ? <Sidebar /> : null}
+      {wide ? <Sidebar online={online} total={farms.length} /> : null}
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={[
@@ -86,14 +97,16 @@ export default function DashboardScreen() {
               />
             ) : null}
             <Txt variant="micro" color={Colors.textSecondary}>
-              {TODAY_LABEL}
+              {today} · {weather.now.temp}°C {weather.now.label.toLowerCase()}
             </Txt>
-            <Txt variant="displayXl" accessibilityRole="header">
-              Overview
-            </Txt>
+            <DemoTrigger>
+              <Txt variant="displayXl" accessibilityRole="header">
+                Overview
+              </Txt>
+            </DemoTrigger>
           </View>
           <View style={styles.headerActions}>
-            <Button label="Print harvest maps" size="md" variant="secondary" icon={Printer} href="/harvest" />
+            <Button label="Open harvest map" size="md" variant="secondary" icon={Sprout} href="/harvest" />
             <Button label={`Offer ${FORECAST_OPEN} kg`} size="md" icon={Store} href="/market" />
           </View>
         </View>
@@ -101,57 +114,73 @@ export default function DashboardScreen() {
         <View style={styles.kpis}>
           <Kpi
             label="Ready to pick today"
-            value={`${TOTAL_PODS_TODAY} pods`}
-            sub="12 more tomorrow"
+            value={`${totals.ready} pods`}
+            sub={`${totals.must} must be picked today`}
             color={Colors.textAccent}
           />
-          <Kpi label="7-day forecast" value={`${FORECAST_TOTAL} kg`} sub={`across ${TOTAL_PLANTS} plants`} />
+          <Kpi
+            label="Farms connected"
+            value={`${online} / ${farms.length}`}
+            sub={
+              online < farms.length ? 'Offline farms keep running on their own' : 'All farms online over LoRa'
+            }
+          />
+          <Kpi
+            label="Alerts"
+            value={`${alerts.length}`}
+            sub={critical ? `${critical} need action now` : 'Nothing urgent'}
+            color={critical ? Colors.dangerFg : Colors.textPrimary}
+          />
           <Kpi
             label="Sold ahead"
             value={`${soldPct}%`}
             sub={`${FORECAST_OPEN} kg still unmatched`}
             color={Colors.successFg}
           />
-          <Kpi
-            label="Farms online"
-            value={`${FARMS_ONLINE} / ${FARMS.length}`}
-            sub={`${offline} on local control`}
-          />
         </View>
 
         <Row wide={wide}>
-          <Card style={[styles.panel, wide && { flex: 1.7 }]}>
-            <SectionHeader title="Farms" action="Open app" href="/home" />
-            <FarmTable compact={!medium} />
-          </Card>
-          <Card style={[styles.panel, wide && { flex: 1 }]}>
-            <SectionHeader title="Alerts" action="LINE settings" href="/alerts" />
-            {ALERT_EVENTS.slice(0, 3).map((e, i) => (
-              <View key={i} style={styles.alert}>
-                <View style={[styles.alertDot, { backgroundColor: ALERT_DOT[e.tone] }]} />
-                <View style={{ flex: 1, gap: 2 }}>
-                  <Txt variant="body" weight={800}>
-                    {e.title}
-                  </Txt>
-                  <Txt variant="small" color={Colors.textSecondary}>
-                    {e.detail}
-                  </Txt>
-                </View>
-                <Txt variant="caption" weight={700} color={Colors.textSecondary} tabular>
-                  {e.time}
-                </Txt>
-              </View>
-            ))}
-          </Card>
+          <Panel wide={wide} flex={1.3}>
+            <SectionHeader title="Harvest Map" action="Open" href="/harvest" />
+            <HarvestGrid grid={grid} picked={picked} maxCell={40} />
+            <Button
+              label={remaining.length ? `Start picking · ${remaining.length} rows` : 'All picked'}
+              icon={ListChecks}
+              size="md"
+              disabled={!remaining.length}
+              href="/picking"
+            />
+          </Panel>
+          <Panel wide={wide} flex={1}>
+            <SectionHeader title="Today" action="Alerts" href="/alerts" />
+            {tasks.length ? (
+              <TodayPlan tasks={tasks} limit={5} onOpen={openFarm} />
+            ) : (
+              <Txt variant="body" color={Colors.textSecondary}>
+                Nothing needs you today.
+              </Txt>
+            )}
+          </Panel>
         </Row>
 
         <Row wide={wide}>
-          <Card style={[styles.panel, wide && { flex: 1.7 }]}>
-            <SectionHeader title="Harvest Forecast · Next 7 Days" />
-            <ForecastChart height={wide ? 170 : 130} barWidth={44} showUnit={medium} />
-          </Card>
-          <Card style={[styles.panel, wide && { flex: 1 }]}>
-            <SectionHeader title="Buyers This Week" action="Market" href="/market" />
+          <Panel wide={wide} flex={1.3}>
+            <SectionHeader title="Farms" action="Open app" href="/home" />
+            <FarmTable farms={farms} alerts={alerts} compact={!medium} />
+          </Panel>
+          <Panel wide={wide} flex={1}>
+            <SectionHeader title="Coming Up" />
+            <UpcomingChart days={upcoming} height={wide ? 140 : 110} framed={false} />
+          </Panel>
+        </Row>
+
+        <Row wide={wide}>
+          <Panel wide={wide} flex={1.3}>
+            <SectionHeader title="Sales Forecast · Next 7 Days" action="Market" href="/market" />
+            <ForecastChart height={wide ? 150 : 120} barWidth={44} showUnit={medium} />
+          </Panel>
+          <Panel wide={wide} flex={1}>
+            <SectionHeader title="Buyers This Week" />
             {BUYERS.map((b) => (
               <View key={b.id} style={styles.buyer}>
                 <View style={{ flex: 1, gap: 1 }}>
@@ -165,15 +194,14 @@ export default function DashboardScreen() {
                 <Badge label={BUYER_BADGE[b.status].label} tone={BUYER_BADGE[b.status].tone} />
               </View>
             ))}
-          </Card>
+          </Panel>
         </Row>
       </ScrollView>
     </View>
   );
 }
 
-function Sidebar() {
-  const offline = FARMS.find((f) => f.status === 'local');
+function Sidebar({ online, total }: { online: number; total: number }) {
   return (
     <View style={styles.sidebar}>
       <View style={{ paddingHorizontal: 8, gap: 4 }}>
@@ -182,7 +210,7 @@ function Sidebar() {
           Farm dashboard
         </Txt>
       </View>
-      <View accessibilityRole="menu" style={{ gap: 4 }}>
+      <View style={{ gap: 4 }}>
         {NAV.map((n) => {
           const active = !n.href;
           const Icon = n.icon;
@@ -214,8 +242,8 @@ function Sidebar() {
           </Txt>
         </View>
         <Txt variant="small" color={Colors.textBody}>
-          {FARMS_ONLINE} of {FARMS.length} farms online.
-          {offline ? ` ${offline.name} on local control for ${offline.lastSync.replace(' ago', '')}.` : ''}
+          {online} of {total} farms connected through one gateway.
+          {online < total ? ' Offline farms keep running on their own and upload later.' : ''}
         </Txt>
       </View>
     </View>
@@ -238,7 +266,7 @@ function Kpi({
       <Txt variant="micro" color={Colors.textSecondary}>
         {label}
       </Txt>
-      <Txt variant="title" color={color} tabular style={{ fontSize: 30, lineHeight: 36 }}>
+      <Txt variant="title" color={color} tabular style={{ fontSize: 32, lineHeight: 38 }}>
         {value}
       </Txt>
       <Txt variant="small" color={Colors.textSecondary}>
@@ -252,68 +280,88 @@ function Row({ wide, children }: { wide: boolean; children: ReactNode }) {
   return <View style={[styles.row, wide && styles.rowWide]}>{children}</View>;
 }
 
-function FarmTable({ compact }: { compact: boolean }) {
+function Panel({ wide, flex, children }: { wide: boolean; flex: number; children: ReactNode }) {
+  return <Card style={[styles.panel, wide && { flex }]}>{children}</Card>;
+}
+
+function FarmTable({
+  farms,
+  alerts,
+  compact,
+}: {
+  farms: MonitorFarm[];
+  alerts: FarmAlert[];
+  compact: boolean;
+}) {
   const cols = compact
-    ? (['Farm', 'Ready', 'Risk'] as const)
-    : (['Farm', 'Link', 'Soil', 'Humidity', 'Air', 'Ready', 'Risk'] as const);
-  const cell = (farm: Farm, col: (typeof cols)[number]): ReactNode => {
-    const read = (key: string) => farm.sensors.find((s) => s.key === key);
-    switch (col) {
+    ? (['Farm', 'Pods', 'Status'] as const)
+    : (['Farm', 'Type', 'Soil', 'Humidity', 'Pods', 'Status'] as const);
+  const flex = (c: string) => (c === 'Farm' ? 1.6 : c === 'Status' || c === 'Type' ? 1.3 : 0.8);
+
+  const cell = (f: MonitorFarm, c: (typeof cols)[number]): ReactNode => {
+    switch (c) {
       case 'Farm':
         return (
-          <Pressable
-            accessibilityRole="link"
-            onPress={() => router.navigate({ pathname: '/home/farm/[id]', params: { id: farm.id } })}
-            style={{ gap: 1 }}>
+          <Pressable accessibilityRole="link" onPress={() => openFarm(f.id)} style={{ gap: 1 }}>
             <Txt variant="body" weight={800}>
-              {farm.name}
+              {f.name}
             </Txt>
-            <Txt variant="caption" color={Colors.textSecondary}>
-              {farm.building}
+            <Txt variant="caption" color={Colors.textSecondary} numberOfLines={1}>
+              {f.building}
             </Txt>
           </Pressable>
         );
-      case 'Link':
-        return farm.status === 'online' ? (
-          <Badge label="Online" tone="success" />
-        ) : (
-          <Badge label="Local" tone="accent" />
-        );
-      case 'Soil':
+      case 'Type':
         return (
-          <Txt variant="body" tabular>
-            {read('moisture')?.value}%
-          </Txt>
+          <Badge
+            label={f.type === 'outdoor' ? 'Outdoor' : 'Indoor'}
+            tone="neutral"
+            icon={f.type === 'outdoor' ? Sun : Warehouse}
+          />
         );
-      case 'Humidity': {
-        const h = read('humidity');
+      case 'Soil': {
+        const dry = f.base.moisture < 35;
         return (
           <Txt
             variant="body"
             tabular
-            weight={h?.warn ? 800 : 400}
-            color={h?.warn ? Colors.dangerFg : Colors.textPrimary}>
-            {h?.value}%
+            weight={dry ? 800 : 400}
+            color={dry ? Colors.textAccent : Colors.textPrimary}>
+            {f.base.moisture}%
           </Txt>
         );
       }
-      case 'Air':
+      case 'Humidity': {
+        const humid = f.base.humidity > 75;
         return (
-          <Txt variant="body" tabular>
-            {read('air')?.value} °C
+          <Txt
+            variant="body"
+            tabular
+            weight={humid ? 800 : 400}
+            color={humid ? Colors.dangerFg : Colors.textPrimary}>
+            {f.base.humidity}%
           </Txt>
         );
-      case 'Ready':
+      }
+      case 'Pods':
         return (
           <Txt variant="body" weight={800} tabular>
-            {farm.podsReady}
+            {f.podsReady}
           </Txt>
         );
-      case 'Risk':
-        return farm.risk ? <Badge label="Mildew 68%" tone="danger" /> : <Badge label="Low" tone="success" />;
+      case 'Status': {
+        const s = farmStatus(f, alerts);
+        return (
+          <View style={styles.status}>
+            <View style={[styles.dot, { backgroundColor: s.dot }]} />
+            <Txt variant="small" weight={700} color={s.text} numberOfLines={1}>
+              {s.label}
+            </Txt>
+          </View>
+        );
+      }
     }
   };
-  const flex = (col: string) => (col === 'Farm' ? 2 : col === 'Risk' ? 1.4 : 1);
 
   return (
     <View>
@@ -326,7 +374,7 @@ function FarmTable({ compact }: { compact: boolean }) {
           </View>
         ))}
       </View>
-      {FARMS.map((f) => (
+      {farms.map((f) => (
         <Fragment key={f.id}>
           <Divider />
           <View style={styles.tr}>
@@ -363,24 +411,18 @@ const styles = StyleSheet.create({
   },
   navActive: { backgroundColor: Colors.accent, boxShadow: Shadow.glow },
   network: { borderRadius: Radius.lg, backgroundColor: Palette.orange100, padding: 14, gap: 8 },
-  main: { gap: 20, width: '100%', maxWidth: 1240, alignSelf: 'center' },
+  main: { gap: 20, width: '100%', maxWidth: 1280, alignSelf: 'center' },
   header: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16 },
   headerStack: { flexDirection: 'column', alignItems: 'stretch' },
   headerActions: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   kpis: { flexDirection: 'row', flexWrap: 'wrap', gap: 16 },
   kpi: { flexGrow: 1, flexBasis: 200, paddingVertical: 18, paddingHorizontal: 20, gap: 6 },
   row: { gap: 16 },
-  rowWide: { flexDirection: 'row', alignItems: 'flex-start' },
-  panel: { paddingVertical: 18, paddingHorizontal: 20, gap: 12 },
-  tr: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 12 },
-  alert: {
-    flexDirection: 'row',
-    gap: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: Colors.borderSubtle,
-  },
-  alertDot: { width: 10, height: 10, borderRadius: 5, marginTop: 5 },
+  rowWide: { flexDirection: 'row', alignItems: 'stretch' },
+  panel: { paddingVertical: 18, paddingHorizontal: 20, gap: 14 },
+  tr: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 11 },
+  status: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  dot: { width: 8, height: 8, borderRadius: 4 },
   buyer: {
     flexDirection: 'row',
     alignItems: 'center',
