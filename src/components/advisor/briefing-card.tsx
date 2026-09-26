@@ -2,6 +2,7 @@ import { RefreshCw, Sunrise } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
+import { AgentFindings, TeamIntro } from '@/components/advisor/agent-findings';
 import { AgentProgress } from '@/components/advisor/agent-progress';
 import { ProposalCard } from '@/components/advisor/proposal-card';
 import { Button } from '@/components/ui/button';
@@ -76,11 +77,16 @@ export function BriefingCard() {
           {briefing.proposals.map((p) => (
             <ProposalCard key={p.id} proposal={p} />
           ))}
+          <AgentFindings trace={briefing.trace ?? []} />
         </>
       ) : (
-        <Txt variant="body" color={Colors.textSecondary}>
-          No briefing yet. The first one arrives tomorrow at 05:45, or run it now.
-        </Txt>
+        <>
+          <Txt variant="body" color={Colors.textSecondary}>
+            No briefing yet. Every morning at 05:45 the orchestrator asks this team to check all farms and writes your
+            plan. Run it now to see it.
+          </Txt>
+          <TeamIntro />
+        </>
       )}
 
       {error ? (

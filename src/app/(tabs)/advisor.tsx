@@ -2,6 +2,7 @@ import { Bell } from 'lucide-react-native';
 
 import { AgentChat } from '@/components/advisor/agent-chat';
 import { BriefingCard } from '@/components/advisor/briefing-card';
+import { AgentDataFeed } from '@/components/advisor/data-feed';
 import { Screen } from '@/components/screen';
 import { IconButton } from '@/components/ui/button';
 import { ScreenTitle, SectionHeader } from '@/components/ui/section-header';
@@ -25,6 +26,7 @@ export default function AdvisorScreen() {
       />
       {agentAvailable ? (
         <>
+          <AgentDataFeed />
           <BriefingCard />
           <SectionHeader title="Ask the Advisor" />
           <AgentChat />

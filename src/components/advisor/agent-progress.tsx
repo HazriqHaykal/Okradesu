@@ -19,7 +19,8 @@ import { AGENT_LABEL, type AgentId, type AgentStep } from '@/services/agent';
 
 const ORDER: AgentId[] = ['orchestrator', 'monitor', 'health', 'harvest', 'market'];
 
-const ICON: Record<AgentId, LucideIcon> = {
+/** One icon per agent, shared across the Advisor screens. */
+export const AGENT_ICON: Record<AgentId, LucideIcon> = {
   orchestrator: Network,
   monitor: Activity,
   health: Leaf,
@@ -57,7 +58,7 @@ export function AgentProgress({ runId, running }: { runId: string; running: bool
       <View style={styles.box}>
         {(steps.length ? agents : ['orchestrator' as AgentId]).map((a) => {
           const st = statusOf(a, steps, true);
-          const Icon = ICON[a];
+          const Icon = AGENT_ICON[a];
           return (
             <View key={a} style={styles.row}>
               <View style={[styles.icon, st === 'done' && styles.iconDone]}>

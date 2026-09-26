@@ -83,7 +83,7 @@ Deno.serve(async (req) => {
       );
       const { data, error } = await db
         .from('agent_briefings')
-        .insert({ summary: reply, proposals: ctx.proposals })
+        .insert({ summary: reply, proposals: ctx.proposals, trace })
         .select()
         .single();
       if (error) throw new Error(`Could not save the briefing: ${error.message}`);
