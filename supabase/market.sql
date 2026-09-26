@@ -159,8 +159,8 @@ create temporary table seed_rows (farm_id text, "row" int, flowers int, ready in
 insert into seed_rows values
   ('field-a', 1, 4, 6, 1), ('field-a', 2, 3, 9, 3), ('field-a', 3, 5, 4, 0),
   ('field-a', 4, 2, 7, 2), ('field-a', 5, 6, 3, 0), ('field-a', 6, 3, 5, 1),
-  ('field-b', 1, 2, 4, 0), ('field-b', 2, 4, 6, 2), ('field-b', 3, 3, 2, 0),
-  ('field-b', 4, 5, 5, 1), ('field-b', 5, 1, 3, 1),
+  ('hillside', 1, 2, 4, 0), ('hillside', 2, 4, 6, 2), ('hillside', 3, 3, 2, 0),
+  ('hillside', 4, 5, 5, 1), ('hillside', 5, 1, 3, 1),
   ('classroom-2', 1, 2, 4, 1), ('classroom-2', 2, 3, 3, 0),
   ('classroom-2', 3, 2, 5, 2), ('classroom-2', 4, 2, 2, 0),
   ('gymnasium', 1, 3, 5, 1), ('gymnasium', 2, 4, 4, 0), ('gymnasium', 3, 2, 6, 2),
@@ -193,7 +193,7 @@ from (
   select f.farm_id, f.farm_idx, k.day, k.kg
   from (values
     ('field-a', 0,     array[1.7, 1.3, 1.2, 1.1, 1.1, 0.9, 0.7]),
-    ('field-b', 1,     array[1.0, 0.9, 0.8, 0.8, 0.8, 0.6, 0.5]),
+    ('hillside', 1,     array[1.0, 0.9, 0.8, 0.8, 0.8, 0.6, 0.5]),
     ('classroom-2', 2, array[0.7, 0.6, 0.6, 0.6, 0.5, 0.4, 0.3]),
     ('gymnasium', 3,   array[1.3, 1.1, 0.9, 0.9, 0.8, 0.7, 0.5]),
     ('house-4', 4,     array[0.5, 0.4, 0.4, 0.4, 0.3, 0.3, 0.2]),
@@ -216,7 +216,7 @@ join buyers b on b.name = o.buyer;
 
 -- A few open listings buyers can reserve right away.
 insert into listings (farm_id, harvest_date, quantity_kg, grade, price_per_kg, listing_type, status) values
-  ('field-b',   jst_today() + 5, 0.3, 'A', 1000, 'regular', 'open'),
+  ('hillside',  jst_today() + 5, 0.3, 'A', 1000, 'regular', 'open'),
   ('gymnasium', jst_today() + 4, 0.2, 'B',  700, 'regular', 'open');
 
 -- Yesterday's overgrown pods went to the pickle maker.

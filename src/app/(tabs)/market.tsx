@@ -6,8 +6,8 @@ import { FarmerView, type Scope } from '@/components/market/farmer-view';
 import { MarketError, MarketLoading } from '@/components/market/states';
 import { Screen } from '@/components/screen';
 import { IconButton } from '@/components/ui/button';
+import { Segmented } from '@/components/ui/chip';
 import { ScreenTitle } from '@/components/ui/section-header';
-import { Segmented } from '@/components/ui/segmented';
 import { marketActions, useMarket } from '@/state/market-store';
 
 type Role = 'farmer' | 'buyer';
@@ -31,10 +31,9 @@ export default function MarketScreen() {
       />
 
       <Segmented
-        label="Market view"
         value={role}
         onChange={setRole}
-        segments={[
+        options={[
           { value: 'farmer', label: 'Farmer' },
           { value: 'buyer', label: 'Buyer' },
         ]}

@@ -10,6 +10,7 @@ import { Button, IconButton } from '@/components/ui/button';
 import { Meter } from '@/components/ui/surface';
 import { Txt } from '@/components/ui/text';
 import { Colors, MaxContentWidth, Palette, Radius, Shadow } from '@/constants/theme';
+import { useDemo } from '@/data/demo';
 import { getFarm, type FarmKind } from '@/data/farms';
 import { harvestPlan, rowsLabel, type PlanRow } from '@/data/harvest';
 import { harvestActions, pickedToday, useHarvestStore, type HarvestBatch } from '@/state/harvest-store';
@@ -21,12 +22,16 @@ export default function PickingScreen() {
   const params = useLocalSearchParams<{ kind?: string; farm?: string }>();
   const insets = useSafeAreaInsets();
   const batches = useHarvestStore((s) => s.batches);
+  const { newPods } = useDemo();
   const rows = useMemo(() => {
     const picked = pickedToday(batches);
-    return harvestPlan({
-      kind: (params.kind || undefined) as FarmKind | undefined,
-      farmId: params.farm || undefined,
-    }).filter((r) => !picked.has(r.key));
+    return harvestPlan(
+      {
+        kind: (params.kind || undefined) as FarmKind | undefined,
+        farmId: params.farm || undefined,
+      },
+      newPods,
+    ).filter((r) => !picked.has(r.key));
     // The route is fixed once picking starts; later batches shouldn't reshuffle it.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.kind, params.farm]);

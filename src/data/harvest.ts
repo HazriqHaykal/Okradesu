@@ -82,27 +82,70 @@ export type PlanRow = DetectionRow & {
 
 export const rowKey = (farmId: string, row: number) => `${farmId}#${row}`;
 
-export function getRow(farmId: string, row: number) {
-  return DETECTIONS[farmId]?.find((r) => r.row === row);
+/**
+ * Demo mode's "camera found new pods" lands on Field A, row 1 — the same farm
+ * the Farm Monitor demo bumps — so Home and Harvest show the same number.
+ */
+export const DEMO_POD_ROW = { farmId: 'field-a', row: 1 } as const;
+
+function withExtra(farmId: string, d: DetectionRow, extraReady: number): DetectionRow {
+  if (!extraReady || farmId !== DEMO_POD_ROW.farmId || d.row !== DEMO_POD_ROW.row) return d;
+  return { ...d, ready: d.ready + extraReady };
+}
+
+export function getRow(farmId: string, row: number, extraReady = 0) {
+  const d = DETECTIONS[farmId]?.find((r) => r.row === row);
+  return d ? withExtra(farmId, d, extraReady) : undefined;
+}
+
+const toPlanRow = (farm: Farm, d: DetectionRow): PlanRow => ({
+  ...d,
+  key: rowKey(farm.id, d.row),
+  farm,
+  urgency: d.overdue > 0 ? 'must' : d.ready > 0 ? 'ready' : 'processor',
+  minutes: Math.max(1, Math.round((d.ready + d.overgrown) * 0.2 + 1)),
+  grams: d.ready * 12,
+});
+
+/** Every row of every farm in bed order, including rows with nothing to pick (for the map). */
+export function allRows(extraReady = 0): { farm: Farm; rows: PlanRow[] }[] {
+  return FARMS.map((farm) => ({
+    farm,
+    rows: (DETECTIONS[farm.id] ?? []).map((d) => toPlanRow(farm, withExtra(farm.id, d, extraReady))),
+  }));
 }
 
 /** Every row with something to pick, most urgent first. */
-export function harvestPlan(filter?: { kind?: FarmKind; farmId?: string }): PlanRow[] {
-  return FARMS.filter(
-    (f) => (!filter?.kind || f.kind === filter.kind) && (!filter?.farmId || f.id === filter.farmId),
-  )
-    .flatMap((farm) =>
-      (DETECTIONS[farm.id] ?? []).map<PlanRow>((d) => ({
-        ...d,
-        key: rowKey(farm.id, d.row),
-        farm,
-        urgency: d.overdue > 0 ? 'must' : d.ready > 0 ? 'ready' : 'processor',
-        minutes: Math.max(1, Math.round((d.ready + d.overgrown) * 0.2 + 1)),
-        grams: d.ready * 12,
-      })),
+export function harvestPlan(filter?: { kind?: FarmKind; farmId?: string }, extraReady = 0): PlanRow[] {
+  return allRows(extraReady)
+    .filter(
+      ({ farm }) =>
+        (!filter?.kind || farm.kind === filter.kind) && (!filter?.farmId || farm.id === filter.farmId),
     )
+    .flatMap(({ rows }) => rows)
     .filter((r) => r.ready > 0 || r.overgrown > 0)
     .sort((a, b) => b.overdue - a.overdue || b.ready - a.ready || b.overgrown - a.overgrown);
+}
+
+/**
+ * Pods expected over the next days: today's ready pods, then every flower
+ * whose ready window opens on that day (the flower countdown, summed).
+ */
+export function upcomingPods(days = 4, extraReady = 0): { date: Date; pods: number }[] {
+  const grid = allRows(extraReady);
+  const today = grid.flatMap((g) => g.rows).reduce((n, r) => n + r.ready, 0);
+  const out = [{ date: TODAY, pods: today }];
+  for (let i = 1; i < days; i++) {
+    const day = addDays(TODAY, i);
+    let pods = 0;
+    for (const { farm, rows } of grid) {
+      for (const r of rows) {
+        for (const c of flowerCountdown(farm, r)) if (dayDiff(c.readyFrom, day) === 0) pods += c.count;
+      }
+    }
+    out.push({ date: day, pods });
+  }
+  return out;
 }
 
 export function planTotals(rows: PlanRow[]) {

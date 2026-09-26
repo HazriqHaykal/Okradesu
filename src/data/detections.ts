@@ -35,7 +35,7 @@ export const DETECTIONS: Record<string, DetectionRow[]> = {
     [5, 6, 3, 7, 0, 0],
     [6, 3, 5, 4, 0, 1],
   ]),
-  'field-b': rows([
+  hillside: rows([
     [1, 2, 4, 3, 0, 0],
     [2, 4, 6, 2, 1, 2],
     [3, 3, 2, 5, 0, 0],

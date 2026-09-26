@@ -119,7 +119,7 @@ export function seedMarket(now = new Date()) {
     status: 'open',
     created_at: created,
   });
-  listings.push(open('lst-open-1', 'field-b', 5, 0.3, 'A'), open('lst-open-2', 'gymnasium', 4, 0.2, 'B'));
+  listings.push(open('lst-open-1', 'hillside', 5, 0.3, 'A'), open('lst-open-2', 'gymnasium', 4, 0.2, 'B'));
 
   // Yesterday's overgrown pods went to the pickle maker.
   listings.push({
