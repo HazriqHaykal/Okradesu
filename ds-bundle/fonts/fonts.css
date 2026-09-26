@@ -1,0 +1,30 @@
+@font-face{
+  font-family: 'Anton_400Regular';
+  src: url('./Anton_400Regular.ttf') format('truetype');
+  font-display: swap;
+}
+@font-face{
+  font-family: 'Manrope_400Regular';
+  src: url('./Manrope_400Regular.ttf') format('truetype');
+  font-display: swap;
+}
+@font-face{
+  font-family: 'Manrope_500Medium';
+  src: url('./Manrope_500Medium.ttf') format('truetype');
+  font-display: swap;
+}
+@font-face{
+  font-family: 'Manrope_600SemiBold';
+  src: url('./Manrope_600SemiBold.ttf') format('truetype');
+  font-display: swap;
+}
+@font-face{
+  font-family: 'Manrope_700Bold';
+  src: url('./Manrope_700Bold.ttf') format('truetype');
+  font-display: swap;
+}
+@font-face{
+  font-family: 'Manrope_800ExtraBold';
+  src: url('./Manrope_800ExtraBold.ttf') format('truetype');
+  font-display: swap;
+}
