@@ -42,7 +42,9 @@ create table agent_briefings (
   -- The agent's plan for the day, in plain language.
   summary    text not null,
   -- Actions it suggests; the farmer confirms each one in the app.
-  proposals  jsonb not null default '[]'::jsonb
+  proposals  jsonb not null default '[]'::jsonb,
+  -- What each specialist agent was asked, reported, and which data it read.
+  trace      jsonb not null default '[]'::jsonb
 );
 
 create table agent_steps (

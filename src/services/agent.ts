@@ -47,8 +47,20 @@ export const AGENT_LABEL: Record<AgentId, string> = {
   market: 'Market',
 };
 
-/** Who did what in one run: each specialist's task and report. */
-export type Trace = { agent: AgentId; task: string; report: string }[];
+/** What each agent keeps an eye on (shown before any run). */
+export const AGENT_ABOUT: Record<AgentId, string> = {
+  orchestrator: 'Plans, asks the specialists, settles conflicts and writes your plan.',
+  monitor: 'Live sensors, LoRa network, weather and watering.',
+  health: 'Mildew and disease risk from humidity and temperature; fans and LEDs.',
+  harvest: "Today's camera counts: what must be picked and in which rows.",
+  market: '7-day yield forecast, surplus, listings and buyers.',
+};
+
+/** A data reference, e.g. { label: "Live sensors", detail: "5/6 farms reporting · 08:09" }. */
+export type Source = { tool: string; label: string; detail: string };
+
+/** Who did what in one run: each specialist's task, report and the data it read. */
+export type Trace = { agent: AgentId; task: string; report: string; sources: Source[] }[];
 
 export type AgentReply = { reply: string; proposals: Proposal[]; history: AgentHistory; trace: Trace };
 
@@ -61,7 +73,7 @@ export const newRunId = () =>
     return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
   });
 
-export type Briefing = { id: number; created_at: string; summary: string; proposals: Proposal[] };
+export type Briefing = { id: number; created_at: string; summary: string; proposals: Proposal[]; trace: Trace };
 
 export const agentAvailable = !!supabase;
 

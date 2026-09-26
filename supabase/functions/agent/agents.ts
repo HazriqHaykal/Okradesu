@@ -15,7 +15,7 @@ import {
   type GenerateContentConfig,
 } from 'npm:@google/genai@^2.24';
 
-import { TOOLS, runTool, type ToolContext } from './tools.ts';
+import { TOOLS, runTool, sourceOf, type Source, type ToolContext } from './tools.ts';
 
 /**
  * Models to try in order. Free-tier quota is per model, so when one is used
@@ -23,14 +23,15 @@ import { TOOLS, runTool, type ToolContext } from './tools.ts';
  * briefly first. Once a model answers, that agent stays on it for the run.
  */
 /** Plans and writes the farmer-facing answer. */
-export const ORCHESTRATOR_MODELS = ['gemini-3.5-flash', 'gemini-3.6-flash', 'gemini-3.7-flash', 'gemini-3.8-flash', 'gemini-3.5-flash-lite'];
+export const ORCHESTRATOR_MODELS = ['gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite'];
 /** Narrow, tool-heavy tasks; lighter models spread the quota. */
 export const SPECIALIST_MODELS = ['gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-3.5-flash', 'gemini-3.6-flash'];
 const OVERLOAD_RETRY_MS = 2000;
 
 export type AgentId = 'orchestrator' | 'monitor' | 'health' | 'harvest' | 'market';
 export type StepFn = (agent: AgentId, message: string) => Promise<void>;
-export type Trace = { agent: AgentId; task: string; report: string };
+/** What one specialist was asked, what it reported and which data it read. */
+export type Trace = { agent: AgentId; task: string; report: string; sources: Source[] };
 
 // ── One model call, moving down the model list while Gemini is busy ─
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -119,7 +120,7 @@ const SPECIALIST_RULES = `You are one specialist in a team led by an orchestrato
 - Use your tools for real data; never invent a number. If a tool fails, say what you couldn't check.
 - You cannot act. If an action is clearly worth doing now, call a propose_* tool (at most two); the farmer confirms it later. Never say an action is done.
 - A farm whose LoRa link is offline runs on its own controller; commands to it wait at the gateway.
-- Report back to the orchestrator in a few short factual bullets with farm names, numbers and units, and list any proposals you made. No greeting, no markdown.`;
+- Report back to the orchestrator in a few short factual bullets with farm names, numbers and units, and list any proposals you made. Say which data each finding comes from and its time when known (e.g. "sensor reading 08:09", "camera 05:40", "weather forecast"). No greeting, no markdown.`;
 
 type Specialist = { label: string; area: string; tools: string[] };
 
@@ -164,6 +165,7 @@ async function runSpecialist(
   step: StepFn,
 ) {
   const spec = SPECIALISTS[id];
+  const sources: Source[] = [];
   const declarations = TOOLS.filter((t) => spec.tools.includes(t.name)).map((t) => ({
     name: t.name,
     description: t.description,
@@ -182,6 +184,8 @@ async function runSpecialist(
       if (!spec.tools.includes(name)) return { error: `${name} is not one of your tools.` };
       if (TOOL_STEP[name]) await step(id, TOOL_STEP[name]);
       const outcome = await runTool(ctx, name, call.args ?? {});
+      const source = sourceOf(ctx, name, call.args ?? {}, outcome);
+      if (source) sources.push(source);
       const made = outcome.ok ? (outcome.result as { status?: string; title?: string }) : null;
       if (made?.status === 'proposed' && made.title) await step(id, `suggested: ${made.title}`);
       return outcome.ok ? { output: outcome.result } : { error: outcome.error };
@@ -189,7 +193,7 @@ async function runSpecialist(
   });
   const report = text || 'No findings (the specialist did not answer).';
   await step(id, 'reported back');
-  return report;
+  return { report, sources };
 }
 
 // ── Orchestrator ───────────────────────────────────────────────────
@@ -229,6 +233,7 @@ How to work:
 
 How to answer the farmer:
 - Short and plain: a one-line headline, then a few bullets starting with "• ", in priority order, with farm names, numbers and units (%, °C, kg, ¥). No jargon, no markdown (no **, #, or tables). Don't mention the agents by name unless asked.
+- Every bullet is based on data a specialist read. End each bullet with its reference in square brackets, from the specialists' data_read, e.g. [Live sensors 08:09], [Weather forecast], [Camera counts 26 Sep], [Market forecast], [Listings].
 - If a specialist couldn't check something, say so.`;
 
 const DROP_TOOL: FunctionDeclaration = {
@@ -271,9 +276,13 @@ export async function orchestrate(ai: GoogleGenAI, contents: Content[], ctx: Too
       if (!SPECIALISTS[id]) return { error: `No agent called ${call.name}.` };
       if (!task) return { error: 'Give the agent a task.' };
       const before = ctx.proposals.length;
-      const report = await runSpecialist(ai, id, task, ctx, step);
-      trace.push({ agent: id, task, report });
-      return { report, proposed_actions: ctx.proposals.slice(before).map((p) => p.title) };
+      const { report, sources } = await runSpecialist(ai, id, task, ctx, step);
+      trace.push({ agent: id, task, report, sources });
+      return {
+        report,
+        data_read: sources.map((x) => `${x.label} (${x.detail})`),
+        proposed_actions: ctx.proposals.slice(before).map((p) => p.title),
+      };
     },
   });
   await step('orchestrator', 'writing the answer');

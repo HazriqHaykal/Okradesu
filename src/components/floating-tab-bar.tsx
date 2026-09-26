@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Txt } from '@/components/ui/text';
-import { Colors, Radius, Shadow } from '@/constants/theme';
+import { Colors, Palette, Radius, Shadow } from '@/constants/theme';
 
 /** The system's BottomNav: a white pill that floats over content. */
 export function FloatingTabBar({ children }: TabListProps) {
@@ -18,10 +18,15 @@ export function FloatingTabBar({ children }: TabListProps) {
   );
 }
 
-type TabButtonProps = TabTriggerSlotProps & { icon: LucideIcon; label: string };
+type TabButtonProps = TabTriggerSlotProps & {
+  icon: LucideIcon;
+  label: string;
+  /** Tinted even when not selected (the AI Advisor in the middle). */
+  highlight?: boolean;
+};
 
 /** Active tab fills orange and shows its label; the rest are icon-only. */
-export function TabButton({ icon: Icon, label, isFocused, ...props }: TabButtonProps) {
+export function TabButton({ icon: Icon, label, highlight, isFocused, ...props }: TabButtonProps) {
   return (
     <Pressable
       {...props}
@@ -30,10 +35,15 @@ export function TabButton({ icon: Icon, label, isFocused, ...props }: TabButtonP
       accessibilityState={{ selected: isFocused }}
       style={({ pressed }) => [
         styles.tab,
+        highlight && !isFocused && styles.tabHighlight,
         isFocused && styles.tabActive,
         pressed && !isFocused && styles.tabPressed,
       ]}>
-      <Icon size={18} color={isFocused ? Colors.textOnAccent : Colors.textSecondary} strokeWidth={2} />
+      <Icon
+        size={18}
+        color={isFocused ? Colors.textOnAccent : highlight ? Colors.textAccent : Colors.textSecondary}
+        strokeWidth={2}
+      />
       {isFocused ? (
         <Txt variant="small" weight={700} color={Colors.textOnAccent}>
           {label}
@@ -71,5 +81,6 @@ const styles = StyleSheet.create({
     borderRadius: Radius.lg,
   },
   tabActive: { backgroundColor: Colors.accent, paddingHorizontal: 16 },
+  tabHighlight: { backgroundColor: Palette.orange200 },
   tabPressed: { backgroundColor: Colors.surfaceSunken },
 });

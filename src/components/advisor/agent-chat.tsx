@@ -4,13 +4,14 @@ import { StyleSheet, View } from 'react-native';
 
 import { AgentProgress } from '@/components/advisor/agent-progress';
 import { ProposalCard } from '@/components/advisor/proposal-card';
+import { SourceChips } from '@/components/advisor/source-chips';
 import { Button, IconButton } from '@/components/ui/button';
 import { Chip, ChipRow } from '@/components/ui/chip';
 import { SearchField } from '@/components/ui/search-field';
 import { Card } from '@/components/ui/surface';
 import { Txt } from '@/components/ui/text';
 import { Colors, Radius } from '@/constants/theme';
-import { askAgent, newRunId, type AgentHistory, type Proposal } from '@/services/agent';
+import { askAgent, newRunId, type AgentHistory, type Proposal, type Trace } from '@/services/agent';
 
 const SUGGESTIONS = [
   'What should I do today?',
@@ -19,7 +20,7 @@ const SUGGESTIONS = [
   'Should I water the outdoor fields?',
 ];
 
-type Turn = { question: string; runId: string; reply?: string; proposals?: Proposal[]; error?: string };
+type Turn = { question: string; runId: string; reply?: string; proposals?: Proposal[]; trace?: Trace; error?: string };
 
 /** Chat with the advisor team: the orchestrator asks the specialists and suggests actions to confirm. */
 export function AgentChat() {
@@ -39,7 +40,7 @@ export function AgentChat() {
     try {
       const res = await askAgent(history, q, runId);
       setHistory(res.history);
-      update({ reply: res.reply, proposals: res.proposals });
+      update({ reply: res.reply, proposals: res.proposals, trace: res.trace });
     } catch (e) {
       update({ error: e instanceof Error ? e.message : 'The advisor could not answer. Try again.' });
     }
@@ -67,6 +68,7 @@ export function AgentChat() {
               <Txt variant="body" color={Colors.textBody}>
                 {t.reply || 'Done.'}
               </Txt>
+              <SourceChips sources={(t.trace ?? []).flatMap((x) => x.sources ?? [])} />
             </Card>
           ) : t.error ? (
             <Card style={styles.bubbleAi}>

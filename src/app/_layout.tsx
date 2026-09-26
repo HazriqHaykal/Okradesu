@@ -48,7 +48,7 @@ export default function RootLayout() {
           options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }}
         />
         <Stack.Screen
-          name="advisor"
+          name="alerts"
           options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }}
         />
       </Stack>
