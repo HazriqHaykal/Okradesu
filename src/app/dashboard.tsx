@@ -4,7 +4,7 @@ import {
   ChevronLeft,
   House,
   LayoutDashboard,
-  MessageCircle,
+  Leaf,
   Printer,
   RadioTower,
   Sprout,
@@ -41,7 +41,7 @@ const NAV: { label: string; icon: LucideIcon; href?: Href }[] = [
   { label: 'Farms', icon: House, href: '/home' },
   { label: 'Harvest maps', icon: Sprout, href: '/harvest' },
   { label: 'Market', icon: Store, href: '/market' },
-  { label: 'Advisor', icon: MessageCircle, href: '/advisor' },
+  { label: 'Disease', icon: Leaf, href: '/disease' },
   { label: 'Alerts', icon: Bell, href: '/alerts' },
 ];
 

@@ -3,6 +3,7 @@ import { Bell, Check, MessageCircle, Send, TriangleAlert } from 'lucide-react-na
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { CropScanner } from '@/components/crop-scanner';
 import { Screen } from '@/components/screen';
 import { Badge } from '@/components/ui/badge';
 import { Button, IconButton } from '@/components/ui/button';
@@ -13,7 +14,7 @@ import { Txt } from '@/components/ui/text';
 import { Colors, Radius, Shadow } from '@/constants/theme';
 import { MAIN_RISK, OTHER_RISKS, TIPS, getFarm, type AdvisorTip } from '@/data/farms';
 
-export default function AdvisorScreen() {
+export default function DiseaseScreen() {
   const riskFarm = getFarm(MAIN_RISK.farmId);
   const [applied, setApplied] = useState<Record<string, boolean>>({});
   const [dismissed, setDismissed] = useState<Record<string, boolean>>({});
@@ -40,11 +41,14 @@ export default function AdvisorScreen() {
   return (
     <Screen>
       <ScreenTitle
-        kicker="Disease risk · next steps"
-        title="Advisor"
+        kicker="Leaf camera · disease risk"
+        title="Disease"
         right={<IconButton icon={Bell} label="Alerts, 2 new" href="/alerts" dot />}
       />
 
+      <CropScanner />
+
+      <SectionHeader title="Disease Risk" />
       <Card style={styles.risk}>
         <View style={styles.riskHead}>
           <View style={{ gap: 4, flexShrink: 1 }}>
