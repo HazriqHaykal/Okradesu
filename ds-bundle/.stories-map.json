@@ -1,0 +1,223 @@
+{
+  "global": "Okradesu",
+  "pkg": "@okradesu/ui",
+  "pkgDir": "C:\\Users\\naimm\\Documents\\Projects\\Okradesu\\.design-sync\\pkg",
+  "extraEntries": [],
+  "exported": [
+    "Badge",
+    "Button",
+    "Card",
+    "Divider",
+    "FARMS",
+    "ForecastChart",
+    "HarvestGrid",
+    "IconButton",
+    "IconWell",
+    "Icons",
+    "InfoStat",
+    "LegendSwatch",
+    "MaturityBadge",
+    "MaxContentWidth",
+    "Meter",
+    "OkraFlower",
+    "OkraPod",
+    "RenderPlaceholder",
+    "RowSnapshot",
+    "ScreenTitle",
+    "SearchField",
+    "SectionHeader",
+    "TodayPlan",
+    "Toggle",
+    "Txt",
+    "UpcomingChart"
+  ],
+  "storybookStatic": null,
+  "keyRecipe": 7,
+  "cfgSliceGlobal": "a139d95ad8ab0a8ba08b44a258c54602e36090304087f48fe923c61aa5a8ae08",
+  "components": [
+    {
+      "name": "Badge",
+      "group": "general",
+      "srcSha": null,
+      "sourceKey": "2b2fd52197634af4",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    },
+    {
+      "name": "Button",
+      "group": "general",
+      "srcSha": null,
+      "sourceKey": "184b89e3035def7d",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    },
+    {
+      "name": "Card",
+      "group": "general",
+      "srcSha": null,
+      "sourceKey": "afa54f68d2624cbe",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    },
+    {
+      "name": "Divider",
+      "group": "general",
+      "srcSha": null,
+      "sourceKey": "52bb36412f03d321",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    },
+    {
+      "name": "ForecastChart",
+      "group": "harvest",
+      "srcSha": null,
+      "sourceKey": "395b86c697012113",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    },
+    {
+      "name": "HarvestGrid",
+      "group": "harvest",
+      "srcSha": null,
+      "sourceKey": "a817b391f2b7e85e",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    },
+    {
+      "name": "IconButton",
+      "group": "general",
+      "srcSha": null,
+      "sourceKey": "a52b41f25927669a",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    },
+    {
+      "name": "IconWell",
+      "group": "general",
+      "srcSha": null,
+      "sourceKey": "30db8eb08cd10a05",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    },
+    {
+      "name": "InfoStat",
+      "group": "general",
+      "srcSha": null,
+      "sourceKey": "e6c1e762770fdbf2",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    },
+    {
+      "name": "LegendSwatch",
+      "group": "harvest",
+      "srcSha": null,
+      "sourceKey": "1fc25652c6229b53",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    },
+    {
+      "name": "MaturityBadge",
+      "group": "harvest",
+      "srcSha": null,
+      "sourceKey": "c907ed2bc79bb338",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    },
+    {
+      "name": "Meter",
+      "group": "general",
+      "srcSha": null,
+      "sourceKey": "a72b8d877b89a879",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    },
+    {
+      "name": "OkraFlower",
+      "group": "illustrations",
+      "srcSha": null,
+      "sourceKey": "e104625a02273267",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    },
+    {
+      "name": "OkraPod",
+      "group": "illustrations",
+      "srcSha": null,
+      "sourceKey": "6fb1f02ca4da9c92",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    },
+    {
+      "name": "RenderPlaceholder",
+      "group": "general",
+      "srcSha": null,
+      "sourceKey": "5162ad715af011f5",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    },
+    {
+      "name": "RowSnapshot",
+      "group": "illustrations",
+      "srcSha": null,
+      "sourceKey": "7e1d6978ab0165cd",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    },
+    {
+      "name": "ScreenTitle",
+      "group": "general",
+      "srcSha": null,
+      "sourceKey": "528d6401f0db236d",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    },
+    {
+      "name": "SearchField",
+      "group": "general",
+      "srcSha": null,
+      "sourceKey": "9193053c5a0326e6",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    },
+    {
+      "name": "SectionHeader",
+      "group": "general",
+      "srcSha": null,
+      "sourceKey": "f317f0708d4fad66",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    },
+    {
+      "name": "TodayPlan",
+      "group": "monitor",
+      "srcSha": null,
+      "sourceKey": "92f006ed4dfe3045",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    },
+    {
+      "name": "Toggle",
+      "group": "general",
+      "srcSha": null,
+      "sourceKey": "9ce1bdad5e90bb8f",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    },
+    {
+      "name": "Txt",
+      "group": "general",
+      "srcSha": null,
+      "sourceKey": "53a6af5d2c74db7a",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    },
+    {
+      "name": "UpcomingChart",
+      "group": "harvest",
+      "srcSha": null,
+      "sourceKey": "2f146d6c0e41d5cc",
+      "cfgSlice": "5ff899b099eb6923833804cda955efdd69101524bec86f67dac5537cd81802e8",
+      "stories": []
+    }
+  ]
+}

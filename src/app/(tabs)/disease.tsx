@@ -1,19 +1,20 @@
 import { router } from 'expo-router';
-import { Check, MessageCircle, Send, TriangleAlert } from 'lucide-react-native';
+import { Bell, Check, MessageCircle, Send, TriangleAlert } from 'lucide-react-native';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { CropScanner } from '@/components/crop-scanner';
+import { Screen } from '@/components/screen';
 import { Badge } from '@/components/ui/badge';
 import { Button, IconButton } from '@/components/ui/button';
 import { SearchField } from '@/components/ui/search-field';
-import { SectionHeader } from '@/components/ui/section-header';
+import { ScreenTitle, SectionHeader } from '@/components/ui/section-header';
 import { Card, Meter } from '@/components/ui/surface';
 import { Txt } from '@/components/ui/text';
 import { Colors, Radius, Shadow } from '@/constants/theme';
 import { MAIN_RISK, OTHER_RISKS, TIPS, getFarm, type AdvisorTip } from '@/data/farms';
 
-/** The sample Advisor shown when Supabase (and so the AI advisor) isn't connected. */
-export function SampleAdvisor() {
+export default function DiseaseScreen() {
   const riskFarm = getFarm(MAIN_RISK.farmId);
   const [applied, setApplied] = useState<Record<string, boolean>>({});
   const [dismissed, setDismissed] = useState<Record<string, boolean>>({});
@@ -45,7 +46,16 @@ export function SampleAdvisor() {
   const tips = TIPS.filter((t) => !dismissed[t.id]);
 
   return (
-    <>
+    <Screen>
+      <ScreenTitle
+        kicker="Leaf camera · disease risk"
+        title="Disease"
+        right={<IconButton icon={Bell} label="Alerts, 2 new" href="/alerts" dot />}
+      />
+
+      <CropScanner />
+
+      <SectionHeader title="Disease Risk" />
       <Card style={styles.risk}>
         <View style={styles.riskHead}>
           <View style={{ gap: 4, flexShrink: 1 }}>
@@ -158,7 +168,7 @@ export function SampleAdvisor() {
         />
         <IconButton icon={Send} label="Send question" variant="accent" size={46} onPress={ask} />
       </View>
-    </>
+    </Screen>
   );
 }
 

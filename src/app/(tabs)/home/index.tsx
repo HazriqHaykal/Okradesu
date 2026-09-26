@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { ArrowRight, Bell, ChevronDown, ChevronUp, LayoutDashboard, RadioTower } from 'lucide-react-native';
+import { ArrowRight, Bell, ChevronDown, ChevronUp, LayoutDashboard, RadioTower, Sparkles } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
@@ -47,6 +47,7 @@ export default function HomeScreen() {
                 href="/alerts"
                 dot={alerts.length > 0}
               />
+              <IconButton icon={Sparkles} label="Ask the AI advisor" href="/advisor" />
               <IconButton icon={LayoutDashboard} label="Open web dashboard" href="/dashboard" />
             </View>
           }

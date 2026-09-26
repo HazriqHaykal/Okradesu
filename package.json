@@ -14,6 +14,7 @@
     "expo-font": "~57.0.4",
     "expo-glass-effect": "~57.0.4",
     "expo-image": "~57.0.5",
+    "expo-image-picker": "~57.0.20",
     "expo-linear-gradient": "~57.0.2",
     "expo-linking": "~57.0.11",
     "expo-router": "~57.0.23",
@@ -45,6 +46,9 @@
   },
   "scripts": {
     "start": "expo start",
+    "dev": "concurrently \"npm run ai\" \"npm run expo\"",
+    "expo": "expo start",
+    "ai": "cd ai && .\\.venv-gpu\\Scripts\\python.exe -m uvicorn api:app --host 0.0.0.0 --port 8000",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android",
     "ios": "expo run:ios",

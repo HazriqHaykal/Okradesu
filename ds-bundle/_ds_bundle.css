@@ -1,0 +1,122 @@
+/* Okradesu tokens as CSS variables for layout glue around the components.
+   Mirrors src/constants/theme.ts (same Japan Eateries values). Source: 'Japan Eateries color pairings/tokens/'. */
+/* Google Fonts substitutes — replace with licensed files if the brand has them */
+@import url("https://fonts.googleapis.com/css2?family=Anton&family=Manrope:wght@400;500;600;700;800&display=swap");
+
+:root {
+  /* Orange — the one brand accent */
+  --orange-50: #FFF7EC;
+  --orange-100: #FFF1DC;
+  --orange-150: #FFE9CC;
+  --orange-200: #FFE3BE;
+  --orange-300: #FFCB85;
+  --orange-400: #F8B04E;
+  --orange-500: #F29A1E;
+  --orange-600: #DB8410;
+  --orange-700: #A85E00;
+  --orange-800: #7A4400;
+
+  /* Ink — warm neutrals */
+  --ink-900: #1E1A16;
+  --ink-700: #4A443D;
+  --ink-500: #6F675D;
+  --ink-300: #B8AFA3;
+  --ink-200: #EADCC6;
+  --ink-100: #F4ECE0;
+  --white: #FFFFFF;
+
+  /* Status */
+  --green-500: #3E8E5A;
+  --red-500: #D2462C;
+
+  /* Semantic aliases */
+  --bg-app: var(--orange-50);
+  --gradient-hero: linear-gradient(180deg, var(--orange-200) 0%, var(--orange-50) 38%);
+  --surface-card: var(--white);
+  --surface-tint: var(--orange-150);
+  --surface-sunken: var(--ink-100);
+  --text-primary: var(--ink-900);
+  --text-secondary: var(--ink-500);
+  --text-accent: var(--orange-700);
+  --text-on-accent: var(--ink-900);
+  --accent: var(--orange-500);
+  --accent-hover: var(--orange-400);
+  --accent-pressed: var(--orange-600);
+  --border-subtle: var(--ink-200);
+  --border-strong: var(--ink-900);
+  --rating: var(--orange-500);
+  --success: var(--green-500);
+  --danger: var(--red-500);
+}
+
+:root {
+  --font-display: "Anton", "Impact", "Arial Narrow", sans-serif;
+  --font-body: "Manrope", system-ui, -apple-system, sans-serif;
+
+  --text-display-xl: 44px;
+  --text-display: 38px;
+  --text-display-sm: 28px;
+  --text-title: 22px;
+  --text-heading: 17px;
+  --text-body-lg: 15px;
+  --text-body: 13px;
+  --text-small: 12px;
+  --text-caption: 11px;
+  --text-micro: 10px;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-extrabold: 800;
+
+  --leading-display: 1;
+  --leading-tight: 1.2;
+  --leading-body: 1.55;
+
+  --tracking-display: 0.02em;
+  --tracking-label: 0.08em;
+}
+
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --screen-gutter: 24px;
+
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 22px;
+  --radius-device: 40px;
+  --radius-pill: 999px;
+
+  --shadow-card: 0 4px 14px rgba(30, 26, 22, 0.05);
+  --shadow-tile: 0 2px 8px rgba(30, 26, 22, 0.06);
+  --shadow-float: 0 6px 18px rgba(30, 26, 22, 0.08);
+  --shadow-glow: 0 4px 14px rgba(242, 154, 30, 0.22);
+
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+}
+
+/* Status tones the app adds on top of the Japan Eateries set. */
+:root {
+  --success-bg: #E3F1E7;
+  --success-fg: #2C6A42;
+  --danger-bg: #FBE1DA;
+  --danger-fg: #9A2E1B;
+}
+
+html, body { margin: 0; background: var(--bg-app); color: var(--text-primary); font-family: var(--font-body); font-size: var(--text-body); line-height: var(--leading-body); -webkit-font-smoothing: antialiased; }
+a { color: var(--text-accent); text-decoration: none; font-weight: var(--weight-semibold); }
+a:hover { color: var(--orange-800); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+::selection { background: var(--orange-200); }

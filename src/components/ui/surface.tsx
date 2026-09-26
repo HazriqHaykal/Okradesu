@@ -30,6 +30,7 @@ export function IconWell({
   );
 }
 
+/** Hairline separator in the subtle border colour, for lists inside a Card. */
 export function Divider({ style }: { style?: StyleProp<ViewStyle> }) {
   return <View style={[styles.divider, style]} />;
 }

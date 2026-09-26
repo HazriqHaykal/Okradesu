@@ -34,6 +34,7 @@ export const openRow = (r: PlanRow) =>
 /**
  * The daily harvest map: one line per farm, one square per growing row.
  * Red = must pick today, orange = ready, green = picked, grey = not yet.
+ * @category Harvest
  */
 export function HarvestGrid({
   grid,
@@ -104,7 +105,10 @@ export function HarvestGrid({
   );
 }
 
-/** Bars from the flower countdown: flowers seen today become the coming days' pods. */
+/**
+ * Bars from the flower countdown: flowers seen today become the coming days' pods.
+ * @category Harvest
+ */
 export function UpcomingChart({
   days,
   height = 110,
