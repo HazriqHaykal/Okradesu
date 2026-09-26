@@ -39,6 +39,14 @@ export default function RootLayout() {
         <Stack.Screen name="index" />
         <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
         <Stack.Screen name="dashboard" />
+        <Stack.Screen
+          name="picking"
+          options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }}
+        />
+        <Stack.Screen
+          name="pod-check"
+          options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }}
+        />
       </Stack>
     </>
   );

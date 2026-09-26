@@ -1,51 +1,52 @@
 import { Link, router, useLocalSearchParams } from 'expo-router';
 import { Activity, ChevronLeft, RadioTower, SlidersHorizontal, Sun, Warehouse } from 'lucide-react-native';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { CameraCard } from '@/components/monitor/camera-card';
-import { DemoTrigger } from '@/components/monitor/demo-panel';
-import { FarmMonitor } from '@/components/monitor/farm-monitor';
-import { SmartControl, type Effective } from '@/components/monitor/smart-control';
 import { Screen } from '@/components/screen';
 import { Badge } from '@/components/ui/badge';
 import { IconButton } from '@/components/ui/button';
-import { Segmented } from '@/components/ui/chip';
-import { InfoStat } from '@/components/ui/section-header';
+import { RenderPlaceholder } from '@/components/ui/render-placeholder';
+import { InfoStat, SectionHeader } from '@/components/ui/section-header';
+import { Divider, IconWell } from '@/components/ui/surface';
 import { Txt } from '@/components/ui/text';
+import { Toggle } from '@/components/ui/toggle';
 import { Colors, Palette, Radius, Shadow, TabBarSpace } from '@/constants/theme';
-import { useDemo } from '@/data/demo';
-import { useFarm } from '@/hooks/use-farms';
-import { lightsScheduledOn, useDeviceControl, useLiveFarm } from '@/hooks/use-live-farm';
-import { useWeather } from '@/hooks/use-weather';
+import { getFarm, type Sensor } from '@/data/farms';
 
-type View_ = 'monitor' | 'control';
+type DeviceId = 'led' | 'pump' | 'fan';
+
+const DEVICES: { id: DeviceId; name: string; icon: LucideIcon; auto: string; manual: string }[] = [
+  {
+    id: 'led',
+    name: 'LED grow lights',
+    icon: Lightbulb,
+    auto: 'Auto · 16 h day, off at 22:00',
+    manual: 'Manual · on until you switch it off',
+  },
+  {
+    id: 'pump',
+    name: 'Watering pump',
+    icon: Droplets,
+    auto: 'Auto · next run 14:00 if soil is under 35%',
+    manual: 'Manual · paused, water from here',
+  },
+  {
+    id: 'fan',
+    name: 'Air fans',
+    icon: Fan,
+    auto: 'Auto · runs when humidity is above 75%',
+    manual: 'Manual · held at current speed',
+  },
+];
 
 export default function FarmDetailScreen() {
   const { id, view } = useLocalSearchParams<{ id: string; view?: View_ }>();
   const farm = useFarm(id);
   const demo = useDemo();
   const insets = useSafeAreaInsets();
-  const [tab, setTab] = useState<View_>(view === 'control' ? 'control' : 'monitor');
-  const control = useDeviceControl(farm);
-  const { weather } = useWeather();
-  const outdoor = farm.type === 'outdoor';
-
-  const hourNow = new Date().getHours();
-  const { led, fan, pump } = control.devices;
-  const effective: Effective = {
-    ledOn: led.auto ? lightsScheduledOn(hourNow) : led.on,
-    brightness: led.auto ? 100 : led.level,
-    fanOn: fan.auto ? farm.base.humidity > 75 : fan.on,
-    pumpOn: pump.on,
-  };
-  const live = useLiveFarm(farm, {
-    ledOn: effective.ledOn,
-    brightness: effective.brightness,
-    fanOn: !outdoor && effective.fanOn,
-    wateredAt: control.wateredAt,
-  });
+  const [auto, setAuto] = useState<Record<DeviceId, boolean>>({ led: true, pump: true, fan: true });
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/home'));
 
@@ -55,11 +56,7 @@ export default function FarmDetailScreen() {
         <IconButton icon={ChevronLeft} label="Back" onPress={goBack} />
       </View>
       <View style={styles.renderWrap}>
-        <CameraCard
-          farm={farm}
-          online={farm.status === 'online'}
-          extraReady={farm.id === 'field-a' ? demo.newPods : 0}
-        />
+        <RenderPlaceholder label={`Live camera · ${farm.name}`} height={210} radius={Radius.xl} />
       </View>
 
       <View style={[styles.sheet, { paddingBottom: insets.bottom + TabBarSpace }]}>
@@ -84,10 +81,16 @@ export default function FarmDetailScreen() {
         </View>
 
         <View style={styles.facts}>
-          <InfoStat label={outdoor ? 'Plot' : 'Building'} value={farm.building} />
+          <InfoStat label="Building" value={farm.building} />
           <InfoStat label="Plants" value={`${farm.plants} · day ${farm.day}`} />
           <InfoStat label="Last sync" value={farm.lastSync} />
         </View>
+
+        <Txt variant="body" color={Colors.textBody}>
+          {farm.status === 'online'
+            ? `Linked through LoRa gateway ${farm.gateway}. If the signal drops, the controller in this room keeps the lights, water and air on schedule until it reconnects.`
+            : `The link to gateway ${farm.gateway} dropped ${farm.lastSync}. The controller in this room is keeping the lights, water and air on schedule, and will sync when it reconnects.`}
+        </Txt>
 
         <View style={styles.harvestRow}>
           <Txt variant="body" weight={700}>
@@ -102,27 +105,40 @@ export default function FarmDetailScreen() {
           ) : null}
         </View>
 
-        <Segmented
-          value={tab}
-          onChange={setTab}
-          options={[
-            { value: 'monitor', label: 'Farm Monitor', icon: Activity },
-            { value: 'control', label: 'Smart Control', icon: SlidersHorizontal },
-          ]}
-        />
+        <SectionHeader title="Sensors" />
+        <View style={styles.sensorGrid}>
+          {farm.sensors.map((s) => (
+            <SensorTile key={s.key} sensor={s} />
+          ))}
+        </View>
 
-        {tab === 'monitor' ? (
-          <FarmMonitor farm={farm} live={live} lightsOn={outdoor || effective.ledOn} weather={weather} />
-        ) : (
-          <SmartControl
-            farm={farm}
-            control={control}
-            effective={effective}
-            reading={live.reading}
-            hour={live.hour}
-            weather={weather}
-          />
-        )}
+        <SectionHeader title="Equipment" />
+        <View>
+          {DEVICES.map((d, i) => {
+            const on = auto[d.id];
+            return (
+              <View key={d.id}>
+                {i > 0 ? <Divider /> : null}
+                <View style={styles.device}>
+                  <IconWell icon={d.icon} size={40} />
+                  <View style={{ flex: 1, gap: 2 }}>
+                    <Txt variant="bodyLg" weight={800}>
+                      {d.name}
+                    </Txt>
+                    <Txt variant="small" color={Colors.textSecondary}>
+                      {on ? d.auto : d.manual}
+                    </Txt>
+                  </View>
+                  <Toggle
+                    label={`Automatic control for ${d.name}`}
+                    value={on}
+                    onValueChange={(v) => setAuto((a) => ({ ...a, [d.id]: v }))}
+                  />
+                </View>
+              </View>
+            );
+          })}
+        </View>
       </View>
     </Screen>
   );
@@ -131,7 +147,7 @@ export default function FarmDetailScreen() {
 const styles = StyleSheet.create({
   content: { paddingHorizontal: 0, paddingBottom: 0, gap: 0, flexGrow: 1 },
   topRow: { paddingHorizontal: 24, flexDirection: 'row' },
-  renderWrap: { paddingHorizontal: 24, paddingTop: 12 },
+  renderWrap: { paddingHorizontal: 40, paddingTop: 12 },
   sheet: {
     flexGrow: 1,
     marginTop: 20,
