@@ -1,5 +1,6 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Image } from 'expo-image';
+import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import { useIsFocused } from 'expo-router';
 import { Camera, Images, RotateCcw, ScanSearch, TriangleAlert } from 'lucide-react-native';
@@ -20,6 +21,25 @@ const FROM_LABEL: Record<Capture['from'], string> = {
   phone: 'Phone camera',
   photos: 'From photos',
 };
+
+/**
+ * Crops a camera photo to its centred square — the part the square viewport
+ * shows, since the preview centre-fills it (CameraX FILL_CENTER). The model is
+ * trained on square close-ups; sending the full 3:4 frame adds content the user
+ * never framed and drops confidence below the threshold.
+ */
+async function cropToPreviewSquare(uri: string, width: number, height: number): Promise<string> {
+  const side = Math.min(width, height);
+  const context = ImageManipulator.manipulate(uri).crop({
+    originX: Math.floor((width - side) / 2),
+    originY: Math.floor((height - side) / 2),
+    width: side,
+    height: side,
+  });
+  const image = await context.renderAsync();
+  const result = await image.saveAsync({ compress: 0.9, format: SaveFormat.JPEG });
+  return result.uri;
+}
 
 function describeError(e: unknown): string {
   if (!(e instanceof CropHealthError)) return 'Unable to analyze the image. Please try again.';
@@ -82,7 +102,16 @@ export function LeafScan({ header, onBusyChange }: { header: ReactNode; onBusyCh
     try {
       const picture = await camera.current.takePictureAsync({ quality: 0.8 });
       if (!picture?.uri) throw new Error('Camera returned no image URI');
-      select(picture.uri, 'phone');
+      let squareUri: string;
+      try {
+        squareUri = await cropToPreviewSquare(picture.uri, picture.width, picture.height);
+      } catch (e) {
+        // Never fall back to the full 3:4 photo — it scores lower than what the user framed.
+        console.warn('[LeafScan] cropping the photo failed:', e);
+        setError('Couldn’t prepare the photo for analysis. Take it again.');
+        return;
+      }
+      select(squareUri, 'phone');
     } catch (e) {
       console.warn('[LeafScan] takePictureAsync failed:', e);
       setError('Couldn’t take the photo. Try again.');
@@ -182,6 +211,12 @@ export function LeafScan({ header, onBusyChange }: { header: ReactNode; onBusyCh
         {header}
 
         <CameraViewport badge={badge}>{view}</CameraViewport>
+
+        {!capture && permission?.granted ? (
+          <Txt variant="small" color={Colors.textSecondary} align="center">
+            Fill the square with one leaf — use a close-up of a single leaf.
+          </Txt>
+        ) : null}
 
         <View style={styles.controls}>
           {capture ? (

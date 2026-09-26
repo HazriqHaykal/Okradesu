@@ -1,4 +1,5 @@
 import Constants from "expo-constants";
+import * as Device from "expo-device";
 import { Platform } from "react-native";
 
 const API_PORT = 8000;
@@ -7,16 +8,21 @@ const REQUEST_TIMEOUT_MS = 30000;
 /**
  * Where the FastAPI server lives. In order:
  * 1. EXPO_PUBLIC_CROP_HEALTH_API_URL, if set (e.g. in .env.local).
- * 2. The dev machine's address Metro is served from, so a physical phone on
- *    the same Wi-Fi reaches the PC (10.0.2.2 only works inside the emulator).
- * 3. 10.0.2.2 on Android (emulator → host), localhost elsewhere.
+ * 2. Android emulator: always 10.0.2.2 (the emulator's alias for the PC).
+ * 3. Physical phone: the PC's LAN address that Metro is served from, since
+ *    10.0.2.2 doesn't exist outside the emulator.
+ * 4. 10.0.2.2 on Android, localhost elsewhere.
  */
 function resolveApiUrl(): string {
   const override = process.env.EXPO_PUBLIC_CROP_HEALTH_API_URL?.trim();
   if (override) return override.replace(/\/+$/, "");
 
+  if (Platform.OS === "android" && !Device.isDevice) {
+    return `http://10.0.2.2:${API_PORT}`;
+  }
+
   const devHost = Constants.expoConfig?.hostUri?.split(":")[0];
-  if (devHost && devHost !== "localhost" && devHost !== "127.0.0.1") {
+  if (Device.isDevice && devHost && devHost !== "localhost" && devHost !== "127.0.0.1") {
     return `http://${devHost}:${API_PORT}`;
   }
 
