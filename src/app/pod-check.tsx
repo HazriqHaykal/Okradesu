@@ -260,11 +260,6 @@ export default function PodCheckScreen() {
               <InfoStat label="Grade" value={result.grade} />
               <InfoStat label="Confidence" value={`${Math.round(result.confidence * 100)}%`} />
             </View>
-            {result.simulated ? (
-              <Txt variant="caption" color={Colors.textSecondary}>
-                Demo result: no pod-check model is connected yet (set EXPO_PUBLIC_POD_CHECK_URL).
-              </Txt>
-            ) : null}
             <View style={styles.resultActions}>
               <Button label="Check another" variant="secondary" size="md" icon={RotateCcw} onPress={reset} />
               <Button label="Done" size="md" onPress={close} style={{ flexGrow: 1 }} />
