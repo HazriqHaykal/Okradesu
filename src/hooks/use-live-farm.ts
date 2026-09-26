@@ -1,10 +1,13 @@
 /**
- * Simulated live feed for one farm: a new reading every 5 s, a 24 h history,
- * and device commands that travel "over LoRa". Swap the internals for a
- * Supabase realtime subscription (sensor_readings / commands) when the
- * gateway is ready; the screens only use what these hooks return.
+ * Live feed for one farm: latest reading, a 24 h history and device
+ * commands. With Supabase configured it follows `sensor_readings` and
+ * `commands` (written by person A's gateway, or scripts/mock-gateway.mjs
+ * until the hardware is ready). Without it, readings are simulated here.
+ * The screens only use what these hooks return, so both look the same.
  */
 import { useEffect, useRef, useState } from 'react';
+
+import { supabase } from '@/lib/supabase';
 
 import {
   LIGHT_SCHEDULE,
@@ -76,7 +79,7 @@ export function sample(farm: MonitorFarm, at: Date, seed: number, c: Controls = 
 
 export type HistoryPoint = { at: number; reading: Reading };
 
-export function useLiveFarm(farm: MonitorFarm, controls: Controls = NEUTRAL) {
+function useSimLiveFarm(farm: MonitorFarm, controls: Controls = NEUTRAL) {
   const [now, setNow] = useState(() => Date.now());
   const [mountedAt] = useState(() => Date.now());
 
@@ -105,16 +108,114 @@ export function useLiveFarm(farm: MonitorFarm, controls: Controls = NEUTRAL) {
     updatedAt,
     secondsAgo,
     offline: secondsAgo > OFFLINE_AFTER_MIN * 60,
+    /** True when the gateway has never sent this farm a reading. */
+    neverSeen: false,
     hour: new Date(now).getHours(),
   };
 }
+
+// ── Gateway feed (Supabase) ────────────────────────────────────────
+type ReadingRow = {
+  soil_moisture: number;
+  ph: number;
+  ec: number;
+  temp: number;
+  humidity: number;
+  light: number;
+};
+
+/** Handoff format (soil_moisture, temp, …) → the app's metric keys. */
+const toReading = (r: ReadingRow): Reading => ({
+  moisture: Number(r.soil_moisture),
+  ph: Number(r.ph),
+  ec: Number(r.ec),
+  air: Number(r.temp),
+  humidity: Number(r.humidity),
+  light: Number(r.light),
+});
+
+const HOUR_MS = 3600000;
+
+function useGatewayLiveFarm(farm: MonitorFarm, _controls?: Controls) {
+  const [now, setNow] = useState(() => Date.now());
+  const [mountedAt] = useState(() => Date.now());
+  const [loaded, setLoaded] = useState(false);
+  const [latest, setLatest] = useState<HistoryPoint | null>(null);
+  const [hourly, setHourly] = useState<HistoryPoint[]>([]);
+
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  useEffect(() => {
+    const db = supabase!;
+    let alive = true;
+    const point = (r: ReadingRow & { recorded_at: string }): HistoryPoint => ({
+      at: Date.parse(r.recorded_at),
+      reading: toReading(r),
+    });
+
+    Promise.all([
+      db.from('sensor_readings').select('*').eq('farm_id', farm.id).order('recorded_at', { ascending: false }).limit(1),
+      db.from('sensor_readings_hourly').select('*').eq('farm_id', farm.id).order('hour'),
+    ]).then(([last, hours]) => {
+      if (!alive) return;
+      if (last.data?.[0]) setLatest(point(last.data[0]));
+      setHourly((hours.data ?? []).map((h) => ({ at: Date.parse(h.hour), reading: toReading(h) })));
+      setLoaded(true);
+    });
+
+    const channel = db
+      .channel(`readings-${farm.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'sensor_readings', filter: `farm_id=eq.${farm.id}` },
+        (payload) => setLatest(point(payload.new as ReadingRow & { recorded_at: string })),
+      )
+      .subscribe();
+    return () => {
+      alive = false;
+      db.removeChannel(channel);
+    };
+  }, [farm.id]);
+
+  const reading = latest?.reading ?? farm.base;
+  const updatedAt = latest?.at ?? mountedAt;
+
+  // 24 hourly points plus the latest reading; hours the gateway missed repeat the last known value.
+  const hourKey = Math.floor(updatedAt / HOUR_MS);
+  const history: HistoryPoint[] = [];
+  let carry = hourly[0]?.reading ?? reading;
+  for (let i = 0; i < 24; i++) {
+    const at = (hourKey - 24 + i + 1) * HOUR_MS;
+    const found = hourly.find((h) => Math.floor(h.at / HOUR_MS) === Math.floor(at / HOUR_MS));
+    if (found) carry = found.reading;
+    history.push({ at, reading: carry });
+  }
+  history.push({ at: updatedAt, reading });
+
+  const secondsAgo = Math.max(0, Math.round((now - updatedAt) / 1000));
+  const neverSeen = loaded && !latest;
+  return {
+    reading,
+    history,
+    updatedAt,
+    secondsAgo,
+    offline: neverSeen || secondsAgo > OFFLINE_AFTER_MIN * 60,
+    neverSeen,
+    hour: new Date(now).getHours(),
+  };
+}
+
+export const useLiveFarm = supabase ? useGatewayLiveFarm : useSimLiveFarm;
 
 // ── Commands ───────────────────────────────────────────────────────
 export type CommandState = 'sending' | 'queued' | 'done' | null;
 
 export type DeviceState = { auto: boolean; on: boolean; level: number };
 
-export function useDeviceControl(farm: MonitorFarm) {
+function useSimDeviceControl(farm: MonitorFarm) {
   const online = farm.status === 'online';
   const [devices, setDevices] = useState<Record<DeviceKey, DeviceState>>({
     pump: { auto: true, on: false, level: 100 },
@@ -164,3 +265,88 @@ export function useDeviceControl(farm: MonitorFarm) {
 
   return { devices, command, wateredAt, send, waterNow, setAuto, online };
 }
+
+// ── Commands through Supabase ─────────────────────────────────────
+/** No confirmation from the gateway by then: the command waits there as queued. */
+const ACK_TIMEOUT_MS = 10000;
+
+function useGatewayDeviceControl(farm: MonitorFarm) {
+  const online = farm.status === 'online';
+  const [devices, setDevices] = useState<Record<DeviceKey, DeviceState>>({
+    pump: { auto: true, on: false, level: 100 },
+    led: { auto: true, on: true, level: 100 },
+    fan: { auto: true, on: false, level: 100 },
+  });
+  const [command, setCommand] = useState<Record<DeviceKey, CommandState>>({
+    pump: null,
+    led: null,
+    fan: null,
+  });
+  const [wateredAt, setWateredAt] = useState<number | null>(null);
+  /** Commands waiting for the gateway, by id. */
+  const pending = useRef(new Map<number, { device: DeviceKey; patch: Partial<DeviceState> }>());
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  const later = (ms: number, fn: () => void) => {
+    timers.current.push(setTimeout(fn, ms));
+  };
+
+  useEffect(() => {
+    const db = supabase!;
+    const list = timers.current;
+    const channel = db
+      .channel(`commands-${farm.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'commands', filter: `farm_id=eq.${farm.id}` },
+        (payload) => {
+          const row = payload.new as { id: number; status: string };
+          const cmd = pending.current.get(row.id);
+          if (!cmd || row.status !== 'done') return;
+          pending.current.delete(row.id);
+          setDevices((d) => ({ ...d, [cmd.device]: { ...d[cmd.device], ...cmd.patch } }));
+          setCommand((c) => ({ ...c, [cmd.device]: 'done' }));
+          if (cmd.device === 'pump' && cmd.patch.on) {
+            setWateredAt(Date.now());
+            list.push(setTimeout(() => setDevices((d) => ({ ...d, pump: { ...d.pump, on: false } })), WATER_MS));
+          }
+          list.push(
+            setTimeout(() => setCommand((c) => (c[cmd.device] === 'done' ? { ...c, [cmd.device]: null } : c)), 2500),
+          );
+        },
+      )
+      .subscribe();
+    return () => {
+      db.removeChannel(channel);
+      list.forEach(clearTimeout);
+    };
+  }, [farm.id]);
+
+  /** Inserts a command for the gateway; the device changes once the gateway confirms it. */
+  async function send(device: DeviceKey, patch: Partial<DeviceState>) {
+    setCommand((c) => ({ ...c, [device]: 'sending' }));
+    const next = { ...devices[device], ...patch };
+    const { data, error } = await supabase!
+      .from('commands')
+      .insert({ farm_id: farm.id, device, on: next.on, level: next.level })
+      .select('id')
+      .single();
+    if (error || !data) {
+      setCommand((c) => ({ ...c, [device]: 'queued' }));
+      return;
+    }
+    pending.current.set(data.id, { device, patch });
+    later(ACK_TIMEOUT_MS, () => {
+      if (pending.current.has(data.id)) setCommand((c) => ({ ...c, [device]: 'queued' }));
+    });
+  }
+
+  const waterNow = () => send('pump', { on: true });
+
+  const setAuto = (device: DeviceKey, auto: boolean) =>
+    setDevices((d) => ({ ...d, [device]: { ...d[device], auto } }));
+
+  return { devices, command, wateredAt, send, waterNow, setAuto, online };
+}
+
+export const useDeviceControl = supabase ? useGatewayDeviceControl : useSimDeviceControl;

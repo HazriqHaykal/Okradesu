@@ -64,37 +64,7 @@ from harvest_detections
 where recorded_at > now() - interval '14 days'
 order by farm_id, "row", (recorded_at at time zone 'Asia/Tokyo')::date, recorded_at desc;
 
--- ── Reserve / update reservations atomically ──────────────────────
--- Locks the listing so two buyers can't reserve the same kilos.
-create or replace function reserve_listing(p_listing_id uuid, p_buyer_id uuid, p_quantity_kg numeric)
-returns reservations
-language plpgsql as $$
-declare
-  l listings;
-  taken numeric;
-  r reservations;
-begin
-  select * into l from listings where id = p_listing_id for update;
-  if not found then raise exception 'Listing not found.'; end if;
-  if l.status <> 'open' then raise exception 'This listing is no longer open.'; end if;
-
-  select coalesce(sum(quantity_kg), 0) into taken
-  from reservations where listing_id = l.id and status <> 'cancelled';
-
-  if p_quantity_kg <= 0 or p_quantity_kg > l.quantity_kg - taken then
-    raise exception 'Only % kg left.', l.quantity_kg - taken;
-  end if;
-
-  insert into reservations (listing_id, buyer_id, quantity_kg)
-  values (l.id, p_buyer_id, round(p_quantity_kg, 1))
-  returning * into r;
-
-  if taken + p_quantity_kg >= l.quantity_kg then
-    update listings set status = 'reserved' where id = l.id;
-  end if;
-  return r;
-end $$;
-
+-- ── Update reservations ───────────────────────────────────────────
 -- Confirm or cancel; a cancellation reopens a fully reserved listing.
 create or replace function set_reservation_status(p_id uuid, p_status text)
 returns reservations
@@ -214,7 +184,7 @@ from l
 join seed_orders o on o.farm_id = l.farm_id and jst_today() + o.day = l.harvest_date
 join buyers b on b.name = o.buyer;
 
--- A few open listings buyers can reserve right away.
+-- A few open listings still waiting for buyers.
 insert into listings (farm_id, harvest_date, quantity_kg, grade, price_per_kg, listing_type, status) values
   ('hillside',  jst_today() + 5, 0.3, 'A', 1000, 'regular', 'open'),
   ('gymnasium', jst_today() + 4, 0.2, 'B',  700, 'regular', 'open');
