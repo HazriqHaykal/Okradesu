@@ -1,0 +1,43 @@
+{
+  "passed": true,
+  "browser": "Chrome",
+  "checked": [
+    "roof open/close and reversal",
+    "roof persists on restart",
+    "roof keyboard control in recording view",
+    "roof reduced motion",
+    "roof mobile control",
+    "7 chapters",
+    "scenario rules",
+    "equipment inspector",
+    "labels",
+    "play/pause",
+    "recording view",
+    "GLB export",
+    "390px layout",
+    "file:// offline launch",
+    "1920x1080 recording view"
+  ],
+  "errors": [],
+  "diagnostics": {
+    "chapter": 0,
+    "elapsed": 0,
+    "playing": false,
+    "orbit": false,
+    "labels": true,
+    "clean": false,
+    "selected": null,
+    "time": 31.524900000000965,
+    "roofOpen": true,
+    "roofProgress": 1,
+    "moisture": 42,
+    "pump": false,
+    "scan": false,
+    "internet": true,
+    "buffered": 0,
+    "dry": false,
+    "progress": 0,
+    "drawCalls": 331,
+    "triangles": 25876
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "noEmitOnError": false,
+    "skipLibCheck": true,
+    "outDir": "./pkg/dist/types",
+    "rootDir": "..",
+    "paths": {
+      "@/*": ["../src/*"],
+      "@/assets/*": ["../assets/*"],
+      "expo-router": ["./shims/expo-router.tsx"]
+    }
+  },
+  "include": ["../src/design-system/index.ts"]
+}

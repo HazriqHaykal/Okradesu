@@ -1,0 +1,65 @@
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env*.local
+
+# typescript
+*.tsbuildinfo
+
+example
+
+# generated native folders
+/ios
+/android
+
+# Python / AI (ai/): environments, datasets and training runs stay local.
+# ai/models/best.pt, ai/yolo11n.pt, ai/requirements.txt and ai/*.py ARE committed.
+ai/.venv*/
+ai/**/__pycache__/
+ai/**/*.pyc
+ai/dataset/
+ai/dataset_clean/
+ai/runs/
+__pycache__/
+*.pyc
+
+# design-sync (Claude Design): staged scripts, build output, machine state
+.ds-sync/
+ds-bundle/
+.design-sync/.cache/
+.design-sync/learnings/
+.design-sync/node_modules/
+.design-sync/pkg/dist/
+
+# Supabase CLI local state
+supabase/.temp/

@@ -1,0 +1,32 @@
+/* The app's font faces, named exactly as the components reference them
+   (expo-font registers each weight as its own family, e.g. Manrope_800ExtraBold). */
+@font-face {
+  font-family: 'Anton_400Regular';
+  src: url('../../node_modules/@expo-google-fonts/anton/400Regular/Anton_400Regular.ttf') format('truetype');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Manrope_400Regular';
+  src: url('../../node_modules/@expo-google-fonts/manrope/400Regular/Manrope_400Regular.ttf') format('truetype');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Manrope_500Medium';
+  src: url('../../node_modules/@expo-google-fonts/manrope/500Medium/Manrope_500Medium.ttf') format('truetype');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Manrope_600SemiBold';
+  src: url('../../node_modules/@expo-google-fonts/manrope/600SemiBold/Manrope_600SemiBold.ttf') format('truetype');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Manrope_700Bold';
+  src: url('../../node_modules/@expo-google-fonts/manrope/700Bold/Manrope_700Bold.ttf') format('truetype');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Manrope_800ExtraBold';
+  src: url('../../node_modules/@expo-google-fonts/manrope/800ExtraBold/Manrope_800ExtraBold.ttf') format('truetype');
+  font-display: swap;
+}

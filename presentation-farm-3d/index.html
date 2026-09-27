@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f2e9">
+  <title>Okradesu — The connected field</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="farm.bundle.js"></script>
+</head>
+<body>
+  <main id="experience">
+    <div id="stage" role="img" aria-label="Interactive 3D okra farm with solar-powered sensors, a LoRa gateway, camera, water tank and drip irrigation."></div>
+    <div id="labels" aria-label="Farm equipment"></div>
+    <header class="masthead">
+      <a class="brand" href="#" id="brand-home" aria-label="Okradesu, reset view"><span class="brand-mark">o.</span> okradesu<span class="brand-dot">®</span></a>
+      <span class="masthead-note">CONNECTED AGRICULTURE / FIELD STUDY 01</span>
+      <div class="header-actions"><span class="simulation-tag"><i></i> Concept simulation</span><button id="fullscreen" aria-label="Enter full screen">Full screen ↗</button></div>
+    </header>
+
+    <section class="story" aria-live="polite" aria-atomic="true">
+      <div class="eyebrow"><span id="chapter-no">01 / 07</span><span class="rule"></span><span id="chapter-category">THE BIG PICTURE</span></div>
+      <h1 id="chapter-title">A small field.<br>A connected future.</h1>
+      <p id="chapter-description">Every reading becomes a decision. Explore how an okra field looks after itself, from soil to harvest.</p>
+      <div class="story-note" id="chapter-note">COVERED GROWING · RETRACTABLE ROOF</div>
+      <div class="roof-control"><span id="farm-mode" role="status">Indoor farm · Roof closed</span><button id="roof-toggle" aria-controls="stage" aria-expanded="false" aria-keyshortcuts="R" title="Open or close the roof (R)">Open roof</button></div>
+    </section>
+
+    <aside class="telemetry" aria-label="Simulated field readings">
+      <div class="panel-heading"><span class="live-dot"></span><strong>FIELD A</strong><span id="connection">Connected</span></div>
+      <div class="metric"><span>Soil moisture</span><strong><span id="moisture">42</span><small>%</small></strong><div class="meter"><i id="moisture-meter"></i></div><small id="soil-state">Within the 35–45% target</small></div>
+      <div class="metric-pair"><div><span>Temperature</span><strong><span id="temperature">29</span><small>°C</small></strong></div><div><span>Humidity</span><strong><span id="humidity">65</span><small>%</small></strong></div></div>
+      <dl class="device-states"><div><dt>Solar battery</dt><dd>82%</dd></div><div><dt>Irrigation</dt><dd id="pump-state">Standby</dd></div><div><dt>Camera</dt><dd id="camera-state">Scheduled</dd></div><div><dt>Gateway buffer</dt><dd id="buffer-state">0 readings</dd></div></dl>
+      <div class="telemetry-foot">ILLUSTRATIVE READINGS · ACCELERATED TIME</div>
+    </aside>
+
+    <div class="scene-legend"><span><i class="orange"></i>Sensor data</span><span><i class="blue"></i>Water flow</span><span><i class="green"></i>Crop intelligence</span></div>
+
+    <section id="inspector" class="inspector" hidden aria-live="polite"><button id="close-inspector" aria-label="Close equipment details">×</button><span class="eyebrow" id="equipment-type"></span><h2 id="equipment-title"></h2><p id="equipment-description"></p></section>
+
+    <footer class="director">
+      <div class="director-top"><div class="playback"><button class="primary" id="play">▶ Play guided tour</button><button id="restart" aria-label="Restart guided tour">↺ Restart</button><span id="tour-time">70-second story</span></div><div class="tools"><button id="orbit" aria-pressed="false">Orbit</button><button id="label-toggle" aria-pressed="true">Labels</button><button id="clean" aria-pressed="false">Recording view</button><button id="export-model">Export 3D</button></div></div>
+      <nav id="chapters" aria-label="Presentation chapters"></nav>
+      <div class="director-bottom"><span>DRAG TO ORBIT · SCROLL TO ZOOM · CLICK EQUIPMENT TO EXPLORE</span><span>SPACE Play / pause <b>·</b> R Roof <b>·</b> H Recording view <b>·</b> F Full screen</span></div>
+    </footer>
+    <div class="recording-caption"><span>OKRADESU / CONNECTED FIELD</span><span id="recording-step">01 — The connected field</span><span>CONCEPT SIMULATION</span></div>
+    <button id="exit-clean" hidden>Show controls · H</button>
+    <div id="toast" role="status" hidden></div>
+    <div id="loading"><span class="brand-mark">o.</span><strong>Growing your connected field…</strong><span>Preparing the 3D scene</span></div>
+    <div id="error" hidden role="alert"><h2>The 3D view couldn’t start</h2><p id="error-message">Open this demo in a browser with WebGL 2 and hardware acceleration enabled.</p><button onclick="location.reload()">Try again</button></div>
+    <noscript>This interactive farm needs JavaScript enabled.</noscript>
+  </main>
+</body>
+</html>
