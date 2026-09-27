@@ -12,7 +12,7 @@ import { DETECTIONS } from '@/data/detections';
 import { FARMS } from '@/data/farms';
 import { seedMarket } from '@/data/market-seed';
 import { isoDay, statusAfter } from '@/lib/forecast';
-import { supabase } from '@/lib/supabase';
+import { supabase, uniqueChannel } from '@/lib/supabase';
 import type {
   Buyer,
   HarvestDetection,
@@ -156,7 +156,7 @@ function supabaseBackend(db: NonNullable<typeof supabase>): Backend {
       };
     },
     listen(onChange) {
-      const channel = db.channel('market');
+      const channel = db.channel(uniqueChannel('market'));
       for (const table of Object.keys(TABLE_OF)) {
         channel.on('postgres_changes', { event: '*', schema: 'public', table }, (payload) => {
           const key = TABLE_OF[table];

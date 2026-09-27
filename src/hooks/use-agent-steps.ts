@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { supabase } from '@/lib/supabase';
+import { supabase, uniqueChannel } from '@/lib/supabase';
 import type { AgentStep } from '@/services/agent';
 
 /**
@@ -17,7 +17,7 @@ export function useAgentSteps(runId: string | null) {
       setSteps((list) => (list.some((x) => x.id === s.id) ? list : [...list, s].sort((a, b) => a.id - b.id)));
 
     const channel = db
-      .channel(`agent-steps-${runId}`)
+      .channel(uniqueChannel(`agent-steps-${runId}`))
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'agent_steps', filter: `run_id=eq.${runId}` },

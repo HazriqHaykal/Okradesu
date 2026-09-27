@@ -15,3 +15,11 @@ export const supabase =
         auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
       })
     : null;
+
+/**
+ * A realtime channel name no other subscriber shares. `supabase.channel(name)`
+ * hands back an existing channel with the same name, so a screen that
+ * remounts before the old channel closes (or two screens watching the same
+ * farm) would add listeners to an already-subscribed channel, which throws.
+ */
+export const uniqueChannel = (name: string) => `${name}-${Math.random().toString(36).slice(2, 10)}`;

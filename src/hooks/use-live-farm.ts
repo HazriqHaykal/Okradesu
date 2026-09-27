@@ -7,7 +7,7 @@
  */
 import { useEffect, useRef, useState } from 'react';
 
-import { supabase } from '@/lib/supabase';
+import { supabase, uniqueChannel } from '@/lib/supabase';
 
 import {
   LIGHT_SCHEDULE,
@@ -167,7 +167,7 @@ function useGatewayLiveFarm(farm: MonitorFarm, _controls?: Controls) {
     });
 
     const channel = db
-      .channel(`readings-${farm.id}`)
+      .channel(uniqueChannel(`readings-${farm.id}`))
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'sensor_readings', filter: `farm_id=eq.${farm.id}` },
@@ -295,7 +295,7 @@ function useGatewayDeviceControl(farm: MonitorFarm) {
     const db = supabase!;
     const list = timers.current;
     const channel = db
-      .channel(`commands-${farm.id}`)
+      .channel(uniqueChannel(`commands-${farm.id}`))
       .on(
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'commands', filter: `farm_id=eq.${farm.id}` },
